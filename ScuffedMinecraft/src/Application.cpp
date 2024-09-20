@@ -52,8 +52,8 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	// Create window
-	GLFWwindow* window = glfwCreateWindow(windowX, windowY, "Scuffed Minecraft", NULL, NULL);
-	if (window == NULL)
+	GLFWwindow* window = glfwCreateWindow(windowX, windowY, "Scuffed Minecraft", nullptr, nullptr);
+	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window\n";
 		glfwTerminate();

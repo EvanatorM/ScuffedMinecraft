@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "NoiseSettings.h"
 
 namespace WorldGen
 {

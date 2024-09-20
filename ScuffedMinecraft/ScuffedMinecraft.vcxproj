@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\dev\C++\ScuffedMinecraft\Dependencies\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\dev\C++\ScuffedMinecraft\Dependencies\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\dev\C++\ScuffedMinecraft\Dependencies\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\dev\C++\ScuffedMinecraft\Dependencies\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\dev\C++\ScuffedMinecraft\Dependencies\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\dev\C++\ScuffedMinecraft\Dependencies\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\dev\C++\ScuffedMinecraft\Dependencies\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\dev\C++\ScuffedMinecraft\Dependencies\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Dependencies\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -155,6 +155,7 @@
     <ClCompile Include="src\Block.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\NoiseSettings.cpp" />
     <ClCompile Include="src\Planet.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\TupleHash.h" />
@@ -174,6 +175,7 @@
     <ClInclude Include="src\Blocks.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Chunk.h" />
+    <ClInclude Include="src\NoiseSettings.h" />
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />

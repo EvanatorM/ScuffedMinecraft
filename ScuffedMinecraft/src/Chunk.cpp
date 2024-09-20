@@ -44,12 +44,6 @@ void Chunk::GenerateChunk()
 	WorldGen::GenerateChunkData(chunkPos.x - 1, chunkPos.y,     chunkPos.z, chunkSize, &westData);
 	WorldGen::GenerateChunkData(chunkPos.x,     chunkPos.y + 1, chunkPos.z, chunkSize, &upData);
 	WorldGen::GenerateChunkData(chunkPos.x,     chunkPos.y - 1, chunkPos.z, chunkSize, &downData);
-	//auto northData = Planet::planet->GetChunkData(chunkPos.x, chunkPos.y, chunkPos.z - 1);
-	//auto southData = Planet::planet->GetChunkData(chunkPos.x, chunkPos.y, chunkPos.z + 1);
-	//auto eastData = Planet::planet->GetChunkData(chunkPos.x + 1, chunkPos.y, chunkPos.z);
-	//auto westData = Planet::planet->GetChunkData(chunkPos.x - 1, chunkPos.y, chunkPos.z);
-	//auto upData = Planet::planet->GetChunkData(chunkPos.x, chunkPos.y + 1, chunkPos.z);
-	//auto downData = Planet::planet->GetChunkData(chunkPos.x, chunkPos.y - 1, chunkPos.z);
 
 	//std::cout << "Got chunk data in thread: " << std::this_thread::get_id() << '\n';
 
@@ -82,10 +76,10 @@ void Chunk::GenerateChunk()
 
 					if (northBlock == 0)
 					{
-						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY));
+						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0));
+						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0));
+						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0));
+						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0));
 
 						indices.push_back(currentVertex + 0);
 						indices.push_back(currentVertex + 3);
@@ -112,10 +106,10 @@ void Chunk::GenerateChunk()
 					}
 					if (southBlock == 0)
 					{
-						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY));
-						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY));
+						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1));
+						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1));
+						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1));
+						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1));
 
 						indices.push_back(currentVertex + 0);
 						indices.push_back(currentVertex + 3);
@@ -142,10 +136,10 @@ void Chunk::GenerateChunk()
 					}
 					if (westBlock == 0)
 					{
-						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY));
+						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2));
+						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2));
+						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2));
+						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2));
 
 						indices.push_back(currentVertex + 0);
 						indices.push_back(currentVertex + 3);
@@ -172,10 +166,10 @@ void Chunk::GenerateChunk()
 					}
 					if (eastBlock == 0)
 					{
-						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY));
-						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY));
+						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3));
+						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3));
+						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3));
+						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3));
 
 						indices.push_back(currentVertex + 0);
 						indices.push_back(currentVertex + 3);
@@ -202,10 +196,10 @@ void Chunk::GenerateChunk()
 					}
 					if (bottomBlock == 0)
 					{
-						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY));
-						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY));
+						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4));
+						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4));
+						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4));
+						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4));
 
 						indices.push_back(currentVertex + 0);
 						indices.push_back(currentVertex + 3);
@@ -232,10 +226,10 @@ void Chunk::GenerateChunk()
 					}
 					if (topBlock == 0)
 					{
-						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY));
+						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5));
+						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5));
+						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5));
+						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5));
 
 						indices.push_back(currentVertex + 0);
 						indices.push_back(currentVertex + 3);
@@ -276,6 +270,8 @@ void Chunk::Render(unsigned int modelLoc)
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(1, 2, GL_BYTE, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texGridX));
 			glEnableVertexAttribArray(1);
+			glVertexAttribIPointer(2, 1, GL_BYTE, sizeof(Vertex), (void*)offsetof(Vertex, direction));
+			glEnableVertexAttribArray(2);
 
 			glGenBuffers(1, &ebo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);

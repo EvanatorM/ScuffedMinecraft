@@ -55,17 +55,17 @@ void Planet::Update(float camX, float camY, float camZ, unsigned int modelLoc)
 			// Add middle chunks
 			for (int y = 0; y <= renderHeight; y++)
 			{
-				chunkQueue.push({ camChunkX,     y, camChunkZ + r });
-				chunkQueue.push({ camChunkX + r, y, camChunkZ });
-				chunkQueue.push({ camChunkX,     y, camChunkZ - r });
-				chunkQueue.push({ camChunkX - r, y, camChunkZ });
+				chunkQueue.push({ camChunkX,     camChunkY + y, camChunkZ + r });
+				chunkQueue.push({ camChunkX + r, camChunkY + y, camChunkZ });
+				chunkQueue.push({ camChunkX,     camChunkY + y, camChunkZ - r });
+				chunkQueue.push({ camChunkX - r, camChunkY + y, camChunkZ });
 
 				if (y > 0)
 				{
-					chunkQueue.push({ camChunkX,     -y, camChunkZ + r });
-					chunkQueue.push({ camChunkX + r, -y, camChunkZ });
-					chunkQueue.push({ camChunkX,     -y, camChunkZ - r });
-					chunkQueue.push({ camChunkX - r, -y, camChunkZ });
+					chunkQueue.push({ camChunkX,     camChunkY - y, camChunkZ + r });
+					chunkQueue.push({ camChunkX + r, camChunkY - y, camChunkZ });
+					chunkQueue.push({ camChunkX,     camChunkY - y, camChunkZ - r });
+					chunkQueue.push({ camChunkX - r, camChunkY - y, camChunkZ });
 				}
 			}
 
@@ -74,31 +74,31 @@ void Planet::Update(float camX, float camY, float camZ, unsigned int modelLoc)
 			{
 				for (int y = 0; y <= renderHeight; y++)
 				{
-					chunkQueue.push({ camChunkX + e, y, camChunkZ + r });
-					chunkQueue.push({ camChunkX - e, y, camChunkZ + r });
+					chunkQueue.push({ camChunkX + e, camChunkY + y, camChunkZ + r });
+					chunkQueue.push({ camChunkX - e, camChunkY + y, camChunkZ + r });
 
-					chunkQueue.push({ camChunkX + r, y, camChunkZ + e });
-					chunkQueue.push({ camChunkX + r, y, camChunkZ - e });
+					chunkQueue.push({ camChunkX + r, camChunkY + y, camChunkZ + e });
+					chunkQueue.push({ camChunkX + r, camChunkY + y, camChunkZ - e });
 
-					chunkQueue.push({ camChunkX + e, y, camChunkZ - r });
-					chunkQueue.push({ camChunkX - e, y, camChunkZ - r });
+					chunkQueue.push({ camChunkX + e, camChunkY + y, camChunkZ - r });
+					chunkQueue.push({ camChunkX - e, camChunkY + y, camChunkZ - r });
 
-					chunkQueue.push({ camChunkX - r, y, camChunkZ + e });
-					chunkQueue.push({ camChunkX - r, y, camChunkZ - e });
+					chunkQueue.push({ camChunkX - r, camChunkY + y, camChunkZ + e });
+					chunkQueue.push({ camChunkX - r, camChunkY + y, camChunkZ - e });
 
 					if (y > 0)
 					{
-						chunkQueue.push({ camChunkX + e, -y, camChunkZ + r });
-						chunkQueue.push({ camChunkX - e, -y, camChunkZ + r });
+						chunkQueue.push({ camChunkX + e, camChunkY - y, camChunkZ + r });
+						chunkQueue.push({ camChunkX - e, camChunkY - y, camChunkZ + r });
 
-						chunkQueue.push({ camChunkX + r, -y, camChunkZ + e });
-						chunkQueue.push({ camChunkX + r, -y, camChunkZ - e });
+						chunkQueue.push({ camChunkX + r, camChunkY - y, camChunkZ + e });
+						chunkQueue.push({ camChunkX + r, camChunkY - y, camChunkZ - e });
 
-						chunkQueue.push({ camChunkX + e, -y, camChunkZ - r });
-						chunkQueue.push({ camChunkX - e, -y, camChunkZ - r });
+						chunkQueue.push({ camChunkX + e, camChunkY - y, camChunkZ - r });
+						chunkQueue.push({ camChunkX - e, camChunkY - y, camChunkZ - r });
 
-						chunkQueue.push({ camChunkX - r, -y, camChunkZ + e });
-						chunkQueue.push({ camChunkX - r, -y, camChunkZ - e });
+						chunkQueue.push({ camChunkX - r, camChunkY - y, camChunkZ + e });
+						chunkQueue.push({ camChunkX - r, camChunkY - y, camChunkZ - e });
 					}
 				}
 			}
@@ -106,17 +106,17 @@ void Planet::Update(float camX, float camY, float camZ, unsigned int modelLoc)
 			// Add corners
 			for (int y = 0; y <= renderHeight; y++)
 			{
-				chunkQueue.push({ camChunkX + r, y, camChunkZ + r });
-				chunkQueue.push({ camChunkX + r, y, camChunkZ - r });
-				chunkQueue.push({ camChunkX - r, y, camChunkZ + r });
-				chunkQueue.push({ camChunkX - r, y, camChunkZ - r });
+				chunkQueue.push({ camChunkX + r, camChunkY + y, camChunkZ + r });
+				chunkQueue.push({ camChunkX + r, camChunkY + y, camChunkZ - r });
+				chunkQueue.push({ camChunkX - r, camChunkY + y, camChunkZ + r });
+				chunkQueue.push({ camChunkX - r, camChunkY + y, camChunkZ - r });
 
 				if (y > 0)
 				{
-					chunkQueue.push({ camChunkX + r, -y, camChunkZ + r });
-					chunkQueue.push({ camChunkX + r, -y, camChunkZ - r });
-					chunkQueue.push({ camChunkX - r, -y, camChunkZ + r });
-					chunkQueue.push({ camChunkX - r, -y, camChunkZ - r });
+					chunkQueue.push({ camChunkX + r, camChunkY - y, camChunkZ + r });
+					chunkQueue.push({ camChunkX + r, camChunkY - y, camChunkZ - r });
+					chunkQueue.push({ camChunkX - r, camChunkY - y, camChunkZ + r });
+					chunkQueue.push({ camChunkX - r, camChunkY - y, camChunkZ - r });
 				}
 			}
 		}
