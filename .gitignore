@@ -410,3 +410,5 @@ FodyWeavers.xsd
 *.sln.iml
 
 imgui.ini
+
+build/
