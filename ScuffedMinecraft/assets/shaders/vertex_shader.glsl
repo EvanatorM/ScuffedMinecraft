@@ -15,13 +15,14 @@ uniform mat4 view;
 uniform mat4 projection;
 
 // Array of possible normals based on direction
-const vec3 normals[6] = vec3[6](
-	vec3(0, 0, 1),  // 0
-	vec3(0, 0, -1), // 1
-	vec3(1, 0, 0),  // 2
-	vec3(-1, 0, 0), // 3
-	vec3(0, 1, 0),  // 4
-	vec3(0, -1, 0)  // 5
+const vec3 normals[] = vec3[](
+	vec3( 0,  0,  1), // 0
+	vec3( 0,  0, -1), // 1
+	vec3( 1,  0,  0), // 2
+	vec3(-1,  0,  0), // 3
+	vec3( 0,  1,  0), // 4
+	vec3( 0, -1,  0), // 5
+	vec3( 0, -1,  0)  // 6
 );
 
 void main()

@@ -88,7 +88,7 @@ int main()
 	Shader shader("assets/shaders/vertex_shader.glsl", "assets/shaders/fragment_shader.glsl");
 	shader.use();
 
-	shader.setFloat("texMultiplier", .5f);
+	shader.setFloat("texMultiplier", .25f);
 
 	// Create texture
 	unsigned int texture;
@@ -181,13 +181,7 @@ int main()
 
 		unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
 
-		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		Planet::planet->Update(camera.Position.x, camera.Position.y, camera.Position.z, modelLoc);
-		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-		std::cout << "Planet Update: " 
-			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() 
-			<< "[ms]\n";
 
 		// Draw ImGui UI
 		ImGui::Begin("Test");
@@ -237,7 +231,12 @@ void processInput(GLFWwindow* window)
 		escapeDown = false;
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.ProcessKeyboard(FORWARD, deltaTime);
+	{
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+			camera.ProcessKeyboard(FORWARD_NO_Y, deltaTime);
+		else
+			camera.ProcessKeyboard(FORWARD, deltaTime);
+	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		camera.ProcessKeyboard(BACKWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)

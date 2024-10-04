@@ -1,6 +1,7 @@
 #include "Block.h"
 
-Block::Block(char minX, char minY, char maxX, char maxY)
+Block::Block(char minX, char minY, char maxX, char maxY, bool transparent, bool billboard)
+	: transparent(transparent), billboard(billboard)
 {
 	topMinX = minX;
 	topMinY = minY;
@@ -20,7 +21,8 @@ Block::Block(char minX, char minY, char maxX, char maxY)
 
 Block::Block(char topMinX, char topMinY, char topMaxX, char topMaxY,
 	char bottomMinX, char bottomMinY, char bottomMaxX, char bottomMaxY,
-	char sideMinX, char sideMinY, char sideMaxX, char sideMaxY)
+	char sideMinX, char sideMinY, char sideMaxX, char sideMaxY, bool transparent, bool billboard)
+	: transparent(transparent), billboard(billboard)
 {
 	this->topMinX = topMinX;
 	this->topMinY = topMinY;

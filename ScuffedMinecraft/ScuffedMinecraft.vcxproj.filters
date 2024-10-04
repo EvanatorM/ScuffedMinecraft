@@ -69,6 +69,9 @@
     <ClCompile Include="src\NoiseSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SurfaceFeature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
@@ -125,18 +128,15 @@
     <ClInclude Include="src\NoiseSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\SurfaceFeature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\vertex_shader.glsl" />
     <None Include="assets\shaders\fragment_shader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\sprites\grass_block_side.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\sprites\direction_test.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="assets\sprites\block_map.png">
       <Filter>Resource Files</Filter>
     </Image>

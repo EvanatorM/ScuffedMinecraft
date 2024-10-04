@@ -9,7 +9,8 @@ enum Camera_Movement {
 	LEFT,
 	RIGHT,
 	UP,
-	DOWN
+	DOWN,
+	FORWARD_NO_Y
 };
 
 // Default camera values

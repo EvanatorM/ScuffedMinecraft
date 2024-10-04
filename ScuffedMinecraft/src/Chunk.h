@@ -6,11 +6,11 @@
 
 struct Vertex
 {
-	char posX, posY, posZ;
+	float posX, posY, posZ;
 	char texGridX, texGridY;
 	char direction;
 
-	Vertex(char _posX, char _posY, char _posZ, char _texGridX, char _texGridY, char _direction)
+	Vertex(float _posX, float _posY, float _posZ, char _texGridX, char _texGridY, char _direction)
 	{
 		posX = _posX;
 		posY = _posY;

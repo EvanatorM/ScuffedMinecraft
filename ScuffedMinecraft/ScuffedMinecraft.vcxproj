@@ -158,6 +158,7 @@
     <ClCompile Include="src\NoiseSettings.cpp" />
     <ClCompile Include="src\Planet.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\SurfaceFeature.cpp" />
     <ClCompile Include="src\TupleHash.h" />
     <ClCompile Include="src\WorldGen.cpp" />
     <ClCompile Include="src\WorldGen.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="src\NoiseSettings.h" />
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\SurfaceFeature.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />
     <ClInclude Include="vendor\imgui\imgui.h" />
     <ClInclude Include="vendor\imgui\imgui_impl_glfw.h" />
@@ -196,8 +198,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\block_map.png" />
-    <Image Include="assets\sprites\direction_test.png" />
-    <Image Include="assets\sprites\grass_block_side.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="vendor\imgui\LICENSE.txt" />

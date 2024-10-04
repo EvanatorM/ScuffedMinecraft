@@ -19,5 +19,8 @@ void main()
 
 	vec4 result = vec4(ambient + diffuse, 1.0);
 
-	FragColor = texture(tex, TexCoord) * result;
+	vec4 texResult = texture(tex, TexCoord);
+	if (texResult.a == 0)
+		discard;
+	FragColor = texResult * result;
 }

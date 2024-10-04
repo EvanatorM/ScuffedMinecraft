@@ -60,184 +60,258 @@ void Chunk::GenerateChunk()
 
 				const Block* block = &Blocks::blocks[chunkData[index]];
 
-				// North
+				if (block->billboard)
 				{
-					int northBlock;
-					if (z > 0)
-					{
-						int northIndex = x * chunkSize * chunkSize + (z - 1) * chunkSize + y;
-						northBlock = chunkData[northIndex];
-					}
-					else
-					{
-						int northIndex = x * chunkSize * chunkSize + (chunkSize - 1) * chunkSize + y;
-						northBlock = northData[northIndex];
-					}
+					vertices.push_back(Vertex(x + .85355f, y + 0, z + .85355f, block->sideMinX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .14645f, y + 0, z + .14645f, block->sideMaxX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .85355f, y + 1, z + .85355f, block->sideMinX, block->sideMaxY, 6));
+					vertices.push_back(Vertex(x + .14645f, y + 1, z + .14645f, block->sideMaxX, block->sideMaxY, 6));
 
-					if (northBlock == 0)
-					{
-						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0));
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 3);
+					indices.push_back(currentVertex + 1);
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 2);
+					indices.push_back(currentVertex + 3);
+					currentVertex += 4;
 
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 3);
-						indices.push_back(currentVertex + 1);
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 2);
-						indices.push_back(currentVertex + 3);
-						currentVertex += 4;
-					}
+					vertices.push_back(Vertex(x + .14645f, y + 0, z + .14645f, block->sideMinX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .85355f, y + 0, z + .85355f, block->sideMaxX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .14645f, y + 1, z + .14645f, block->sideMinX, block->sideMaxY, 6));
+					vertices.push_back(Vertex(x + .85355f, y + 1, z + .85355f, block->sideMaxX, block->sideMaxY, 6));
+
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 3);
+					indices.push_back(currentVertex + 1);
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 2);
+					indices.push_back(currentVertex + 3);
+					currentVertex += 4;
+
+					vertices.push_back(Vertex(x + .14645f, y + 0, z + .85355f, block->sideMinX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .85355f, y + 0, z + .14645f, block->sideMaxX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .14645f, y + 1, z + .85355f, block->sideMinX, block->sideMaxY, 6));
+					vertices.push_back(Vertex(x + .85355f, y + 1, z + .14645f, block->sideMaxX, block->sideMaxY, 6));
+
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 3);
+					indices.push_back(currentVertex + 1);
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 2);
+					indices.push_back(currentVertex + 3);
+					currentVertex += 4;
+
+					vertices.push_back(Vertex(x + .85355f, y + 0, z + .14645f, block->sideMinX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .14645f, y + 0, z + .85355f, block->sideMaxX, block->sideMinY, 6));
+					vertices.push_back(Vertex(x + .85355f, y + 1, z + .14645f, block->sideMinX, block->sideMaxY, 6));
+					vertices.push_back(Vertex(x + .14645f, y + 1, z + .85355f, block->sideMaxX, block->sideMaxY, 6));
+
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 3);
+					indices.push_back(currentVertex + 1);
+					indices.push_back(currentVertex + 0);
+					indices.push_back(currentVertex + 2);
+					indices.push_back(currentVertex + 3);
+					currentVertex += 4;
 				}
-
-				// South
+				else
 				{
-					int southBlock;
-					if (z < chunkSize - 1)
+					// North
 					{
-						int southIndex = x * chunkSize * chunkSize + (z + 1) * chunkSize + y;
-						southBlock = chunkData[southIndex];
-					}
-					else
-					{
-						int southIndex = x * chunkSize * chunkSize + 0 * chunkSize + y;
-						southBlock = southData[southIndex];
-					}
-					if (southBlock == 0)
-					{
-						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1));
-						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1));
+						int northBlock;
+						if (z > 0)
+						{
+							int northIndex = x * chunkSize * chunkSize + (z - 1) * chunkSize + y;
+							northBlock = chunkData[northIndex];
+						}
+						else
+						{
+							int northIndex = x * chunkSize * chunkSize + (chunkSize - 1) * chunkSize + y;
+							northBlock = northData[northIndex];
+						}
 
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 3);
-						indices.push_back(currentVertex + 1);
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 2);
-						indices.push_back(currentVertex + 3);
-						currentVertex += 4;
-					}
-				}
+						const Block* northBlockType = &Blocks::blocks[northBlock];
 
-				// West
-				{
-					int westBlock;
-					if (x > 0)
-					{
-						int blockIndex = (x - 1) * chunkSize * chunkSize + z * chunkSize + y;
-						westBlock = chunkData[blockIndex];
-					}
-					else
-					{
-						int blockIndex = (chunkSize - 1) *chunkSize * chunkSize + z * chunkSize + y;
-						westBlock = westData[blockIndex];
-					}
-					if (westBlock == 0)
-					{
-						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2));
+						if (northBlockType->transparent)
+						{
+							vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0));
+							vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0));
+							vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0));
+							vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0));
 
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 3);
-						indices.push_back(currentVertex + 1);
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 2);
-						indices.push_back(currentVertex + 3);
-						currentVertex += 4;
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 3);
+							indices.push_back(currentVertex + 1);
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 2);
+							indices.push_back(currentVertex + 3);
+							currentVertex += 4;
+						}
 					}
-				}
 
-				// East
-				{
-					int eastBlock;
-					if (x < chunkSize - 1)
+					// South
 					{
-						int blockIndex = (x + 1) * chunkSize * chunkSize + z * chunkSize + y;
-						eastBlock = chunkData[blockIndex];
-					}
-					else
-					{
-						int blockIndex = 0 * chunkSize * chunkSize + z * chunkSize + y;
-						eastBlock = eastData[blockIndex];
-					}
-					if (eastBlock == 0)
-					{
-						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3));
-						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3));
+						int southBlock;
+						if (z < chunkSize - 1)
+						{
+							int southIndex = x * chunkSize * chunkSize + (z + 1) * chunkSize + y;
+							southBlock = chunkData[southIndex];
+						}
+						else
+						{
+							int southIndex = x * chunkSize * chunkSize + 0 * chunkSize + y;
+							southBlock = southData[southIndex];
+						}
 
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 3);
-						indices.push_back(currentVertex + 1);
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 2);
-						indices.push_back(currentVertex + 3);
-						currentVertex += 4;
-					}
-				}
+						const Block* southBlockType = &Blocks::blocks[southBlock];
 
-				// Bottom
-				{
-					int bottomBlock;
-					if (y > 0)
-					{
-						int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (y - 1);
-						bottomBlock = chunkData[blockIndex];
-					}
-					else
-					{
-						int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (chunkSize - 1);
-						bottomBlock = downData[blockIndex];
-					}
-					if (bottomBlock == 0)
-					{
-						vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4));
-						vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4));
-						vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4));
+						if (southBlockType->transparent)
+						{
+							vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1));
+							vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1));
+							vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1));
+							vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1));
 
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 3);
-						indices.push_back(currentVertex + 1);
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 2);
-						indices.push_back(currentVertex + 3);
-						currentVertex += 4;
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 3);
+							indices.push_back(currentVertex + 1);
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 2);
+							indices.push_back(currentVertex + 3);
+							currentVertex += 4;
+						}
 					}
-				}
 
-				// Top
-				{
-					int topBlock;
-					if (y < chunkSize - 1)
+					// West
 					{
-						int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (y + 1);
-						topBlock = chunkData[blockIndex];
-					}
-					else
-					{
-						int blockIndex = x * chunkSize * chunkSize + z * chunkSize + 0;
-						topBlock = upData[blockIndex];
-					}
-					if (topBlock == 0)
-					{
-						vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5));
-						vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5));
-						vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5));
+						int westBlock;
+						if (x > 0)
+						{
+							int blockIndex = (x - 1) * chunkSize * chunkSize + z * chunkSize + y;
+							westBlock = chunkData[blockIndex];
+						}
+						else
+						{
+							int blockIndex = (chunkSize - 1) * chunkSize * chunkSize + z * chunkSize + y;
+							westBlock = westData[blockIndex];
+						}
 
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 3);
-						indices.push_back(currentVertex + 1);
-						indices.push_back(currentVertex + 0);
-						indices.push_back(currentVertex + 2);
-						indices.push_back(currentVertex + 3);
-						currentVertex += 4;
+						const Block* westBlockType = &Blocks::blocks[westBlock];
+
+						if (westBlockType->transparent)
+						{
+							vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2));
+							vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2));
+							vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2));
+							vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2));
+
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 3);
+							indices.push_back(currentVertex + 1);
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 2);
+							indices.push_back(currentVertex + 3);
+							currentVertex += 4;
+						}
+					}
+
+					// East
+					{
+						int eastBlock;
+						if (x < chunkSize - 1)
+						{
+							int blockIndex = (x + 1) * chunkSize * chunkSize + z * chunkSize + y;
+							eastBlock = chunkData[blockIndex];
+						}
+						else
+						{
+							int blockIndex = 0 * chunkSize * chunkSize + z * chunkSize + y;
+							eastBlock = eastData[blockIndex];
+						}
+
+						const Block* eastBlockType = &Blocks::blocks[eastBlock];
+
+						if (eastBlockType->transparent)
+						{
+							vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3));
+							vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3));
+							vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3));
+							vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3));
+
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 3);
+							indices.push_back(currentVertex + 1);
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 2);
+							indices.push_back(currentVertex + 3);
+							currentVertex += 4;
+						}
+					}
+
+					// Bottom
+					{
+						int bottomBlock;
+						if (y > 0)
+						{
+							int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (y - 1);
+							bottomBlock = chunkData[blockIndex];
+						}
+						else
+						{
+							int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (chunkSize - 1);
+							bottomBlock = downData[blockIndex];
+						}
+
+						const Block* bottomBlockType = &Blocks::blocks[bottomBlock];
+
+						if (bottomBlockType->transparent)
+						{
+							vertices.push_back(Vertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4));
+							vertices.push_back(Vertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4));
+							vertices.push_back(Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4));
+							vertices.push_back(Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4));
+
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 3);
+							indices.push_back(currentVertex + 1);
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 2);
+							indices.push_back(currentVertex + 3);
+							currentVertex += 4;
+						}
+					}
+
+					// Top
+					{
+						int topBlock;
+						if (y < chunkSize - 1)
+						{
+							int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (y + 1);
+							topBlock = chunkData[blockIndex];
+						}
+						else
+						{
+							int blockIndex = x * chunkSize * chunkSize + z * chunkSize + 0;
+							topBlock = upData[blockIndex];
+						}
+
+						const Block* topBlockType = &Blocks::blocks[topBlock];
+
+						if (topBlockType->transparent)
+						{
+							vertices.push_back(Vertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5));
+							vertices.push_back(Vertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5));
+							vertices.push_back(Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5));
+							vertices.push_back(Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5));
+
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 3);
+							indices.push_back(currentVertex + 1);
+							indices.push_back(currentVertex + 0);
+							indices.push_back(currentVertex + 2);
+							indices.push_back(currentVertex + 3);
+							currentVertex += 4;
+						}
 					}
 				}
 			}
@@ -266,7 +340,7 @@ void Chunk::Render(unsigned int modelLoc)
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
-			glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, posX));
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, posX));
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(1, 2, GL_BYTE, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texGridX));
 			glEnableVertexAttribArray(1);
