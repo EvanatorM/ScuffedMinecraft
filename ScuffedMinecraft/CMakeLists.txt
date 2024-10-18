@@ -18,5 +18,9 @@ add_custom_target(copy_assets ALL
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# global dependency directories
+include_directories(../Dependencies/include/)
+link_directories(../Dependencies/lib/)
+
 add_subdirectory(vendor/imgui)
 add_subdirectory(src)

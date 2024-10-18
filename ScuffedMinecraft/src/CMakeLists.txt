@@ -4,6 +4,4 @@ add_executable(scuffed_mc
   Camera.cpp Planet.cpp WorldGen.cpp ../vendor/glad.c
 ) 
 
-include_directories(../../Dependencies/include/)
-
-target_link_libraries(scuffed_mc imgui glfw)
+target_link_libraries(scuffed_mc imgui glfw3)
