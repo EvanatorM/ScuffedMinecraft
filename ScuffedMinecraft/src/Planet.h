@@ -25,7 +25,7 @@ public:
 public:
 	static Planet* planet;
 	unsigned int numChunks = 0, numChunksRendered = 0;
-	static const unsigned int chunkSize = 32;
+	static const unsigned int chunkSize;
 
 private:
 	std::unordered_map<std::tuple<int, int, int>, Chunk> chunks;

@@ -6,6 +6,8 @@
 
 Planet* Planet::planet = nullptr;
 
+const unsigned int Planet::chunkSize = 32;
+
 // Public
 Planet::Planet(Shader* solidShader, Shader* waterShader, Shader* billboardShader)
 	: solidShader(solidShader), waterShader(waterShader), billboardShader(billboardShader)
