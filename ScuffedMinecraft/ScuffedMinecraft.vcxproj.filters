@@ -131,10 +131,19 @@
     <ClInclude Include="src\SurfaceFeature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\vertex_shader.glsl" />
-    <None Include="assets\shaders\fragment_shader.glsl" />
+    <None Include="assets\shaders\main_vert.glsl" />
+    <None Include="assets\shaders\main_frag.glsl" />
+    <None Include="assets\shaders\water_frag.glsl" />
+    <None Include="assets\shaders\water_vert.glsl" />
+    <None Include="assets\shaders\billboard_vert.glsl" />
+    <None Include="assets\shaders\billboard_frag.glsl" />
+    <None Include="assets\shaders\framebuffer_vert.glsl" />
+    <None Include="assets\shaders\framebuffer_frag.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\block_map.png">

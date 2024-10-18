@@ -1,11 +1,14 @@
 #include "Planet.h"
 
 #include <iostream>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 Planet* Planet::planet = nullptr;
 
 // Public
-Planet::Planet()
+Planet::Planet(Shader* solidShader, Shader* waterShader, Shader* billboardShader)
+	: solidShader(solidShader), waterShader(waterShader), billboardShader(billboardShader)
 {
 
 }
@@ -31,7 +34,7 @@ std::vector<unsigned int> Planet::GetChunkData(int chunkX, int chunkY, int chunk
 	}
 }
 
-void Planet::Update(float camX, float camY, float camZ, unsigned int modelLoc)
+void Planet::Update(float camX, float camY, float camZ)
 {
 	int camChunkX = camX < 0 ? floor(camX / chunkSize) : camX / chunkSize;
 	int camChunkY = camY < 0 ? floor(camY / chunkSize) : camY / chunkSize;
@@ -132,10 +135,12 @@ void Planet::Update(float camX, float camY, float camZ, unsigned int modelLoc)
 		if (chunks.find(chunkTuple) == chunks.end())
 		{
 			chunks.try_emplace(chunkTuple,
-				chunkSize, next
+				chunkSize, next, solidShader, waterShader
 			);
 		}
 	}
+
+	glDisable(GL_BLEND);
 
 	chunksLoading = 0;
 	numChunks = 0;
@@ -154,14 +159,39 @@ void Planet::Update(float camX, float camY, float camZ, unsigned int modelLoc)
 			abs(chunkY - camChunkY) > renderDistance ||
 			abs(chunkZ - camChunkZ) > renderDistance))
 		{
-			it->second.~Chunk();
 			it = chunks.erase(it);
 		}
 		else
 		{
 			numChunksRendered++;
-			it->second.Render(modelLoc);
+			it->second.Render(solidShader, billboardShader);
 			++it;
 		}
+	}
+
+	glEnable(GL_BLEND);
+	waterShader->use();
+	for (auto it = chunks.begin(); it != chunks.end(); )
+	{
+		int chunkX = it->second.chunkPos.x;
+		int chunkY = it->second.chunkPos.y;
+		int chunkZ = it->second.chunkPos.z;
+
+		it->second.RenderWater(waterShader);
+		++it;
+	}
+}
+
+Chunk* Planet::GetChunk(int chunkX, int chunkY, int chunkZ)
+{
+	std::tuple<int, int, int> chunkTuple{ chunkX, chunkY, chunkZ };
+
+	if (chunks.find(chunkTuple) == chunks.end())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return &chunks.at(chunkTuple);
 	}
 }

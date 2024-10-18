@@ -16,6 +16,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Planet.h"
+#include "Blocks.h"
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -42,6 +43,18 @@ Camera camera;
 
 // Window options
 #define VSYNC 1 // 0 for off, 1 for on
+
+float rectangleVertices[] =
+{
+	 // Coords     // TexCoords
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	-1.0f, -1.0f,  0.0f, 0.0f,
+	-1.0f,  1.0f,  0.0f, 1.0f,
+
+	 1.0f,  1.0f,  1.0f, 1.0f,
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	-1.0f,  1.0f,  0.0f, 1.0f
+};
 
 int main()
 {
@@ -84,13 +97,71 @@ int main()
 
 	glEnable(GL_DEPTH_TEST);
 
-	// Create shader
-	Shader shader("assets/shaders/vertex_shader.glsl", "assets/shaders/fragment_shader.glsl");
+	// Create shaders
+	Shader shader("assets/shaders/main_vert.glsl", "assets/shaders/main_frag.glsl");
 	shader.use();
 
-	shader.setFloat("texMultiplier", .25f);
+	shader.setFloat("texMultiplier", 0.0625f);
 
-	// Create texture
+	Shader waterShader("assets/shaders/water_vert.glsl", "assets/shaders/water_frag.glsl");
+	waterShader.use();
+
+	waterShader.setFloat("texMultiplier", 0.0625f);
+
+	Shader billboardShader("assets/shaders/billboard_vert.glsl", "assets/shaders/billboard_frag.glsl");
+	billboardShader.use();
+
+	billboardShader.setFloat("texMultiplier", 0.0625f);
+
+	Shader framebufferShader("assets/shaders/framebuffer_vert.glsl", "assets/shaders/framebuffer_frag.glsl");
+
+	// Create post-processing framebuffer
+	unsigned int FBO;
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	unsigned int framebufferTexture;
+	glGenTextures(1, &framebufferTexture);
+	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowX, windowY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
+
+	unsigned int depthTexture;
+	glGenTextures(1, &depthTexture);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+
+	auto fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fboStatus != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer error: " << fboStatus << '\n';
+
+	unsigned int rectVAO, rectVBO;
+	glGenVertexArrays(1, &rectVAO);
+	glGenBuffers(1, &rectVBO);
+	glBindVertexArray(rectVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), &rectangleVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	framebufferShader.use();
+	glUniform1i(glGetUniformLocation(framebufferShader.ID, "screenTexture"), 0);
+	glUniform1i(glGetUniformLocation(framebufferShader.ID, "depthTexture"), 1);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Create terrain texture
 	unsigned int texture;
 	glGenTextures(1, &texture);
 	glActiveTexture(GL_TEXTURE0);
@@ -122,7 +193,7 @@ int main()
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	Planet::planet = new Planet();
+	Planet::planet = new Planet(&shader, &waterShader, &billboardShader);
 
 	// Initialize ImGui
 	IMGUI_CHECKVERSION();
@@ -158,11 +229,19 @@ int main()
 			fpsStartTime = currentTimePoint;
 		}
 
+		waterShader.use();
+		waterShader.setFloat("time", currentFrame);
+
 		// Input
 		processInput(window);
 
 		// Rendering
+		glEnable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
 		// New ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
@@ -173,15 +252,69 @@ int main()
 		glm::mat4 view = camera.GetViewMatrix();
 
 		glm::mat4 projection;
-		projection = glm::perspective(glm::radians(camera.Zoom), windowX / windowY, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(camera.Zoom), windowX / windowY, 0.1f, 1000.0f);
+
+		shader.use();
 		unsigned int viewLoc = glGetUniformLocation(shader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		unsigned int projectionLoc = glGetUniformLocation(shader.ID, "projection");
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
+		waterShader.use();
+		viewLoc = glGetUniformLocation(waterShader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		projectionLoc = glGetUniformLocation(waterShader.ID, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		Planet::planet->Update(camera.Position.x, camera.Position.y, camera.Position.z, modelLoc);
+		billboardShader.use();
+		viewLoc = glGetUniformLocation(billboardShader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		projectionLoc = glGetUniformLocation(billboardShader.ID, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+		Planet::planet->Update(camera.Position.x, camera.Position.y, camera.Position.z);
+
+		framebufferShader.use();
+
+		// Check if player is underwater
+		int blockX = camera.Position.x < 0 ? camera.Position.x - 1 : camera.Position.x;
+		int blockY = camera.Position.y < 0 ? camera.Position.y - 1 : camera.Position.y;
+		int blockZ = camera.Position.z < 0 ? camera.Position.z - 1 : camera.Position.z;
+
+		int chunkX = blockX < 0 ? floorf(blockX / (float)Planet::chunkSize) : blockX / (int)Planet::chunkSize;
+		int chunkY = blockY < 0 ? floorf(blockY / (float)Planet::chunkSize) : blockY / (int)Planet::chunkSize;
+		int chunkZ = blockZ < 0 ? floorf(blockZ / (float)Planet::chunkSize) : blockZ / (int)Planet::chunkSize;
+
+		int localBlockX = blockX - (chunkX * Planet::chunkSize);
+		int localBlockY = blockY - (chunkY * Planet::chunkSize);
+		int localBlockZ = blockZ - (chunkZ * Planet::chunkSize);
+
+		Chunk* chunk = Planet::planet->GetChunk(chunkX, chunkY, chunkZ);
+		if (chunk != nullptr)
+		{
+			unsigned int blockType = chunk->GetBlockAtPos(
+				localBlockX,
+				localBlockY,
+				localBlockZ);
+
+			if (Blocks::blocks[blockType].blockType == Block::LIQUID)
+			{
+				framebufferShader.setBool("underwater", true);
+			}
+			else
+			{
+				framebufferShader.setBool("underwater", false);
+			}
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindVertexArray(rectVAO);
+		glDisable(GL_DEPTH_TEST);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// Draw ImGui UI
 		ImGui::Begin("Test");

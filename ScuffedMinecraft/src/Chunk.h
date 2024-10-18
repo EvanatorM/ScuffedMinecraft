@@ -4,33 +4,19 @@
 #include <thread>
 #include <glm/glm.hpp>
 
-struct Vertex
-{
-	float posX, posY, posZ;
-	char texGridX, texGridY;
-	char direction;
-
-	Vertex(float _posX, float _posY, float _posZ, char _texGridX, char _texGridY, char _direction)
-	{
-		posX = _posX;
-		posY = _posY;
-		posZ = _posZ;
-
-		texGridX = _texGridX;
-		texGridY = _texGridY;
-
-		direction = _direction;
-	}
-};
+#include "Shader.h"
+#include "Vertex.h"
 
 class Chunk
 {
 public:
-	Chunk(unsigned int chunkSize, glm::vec3 chunkPos);
+	Chunk(unsigned int chunkSize, glm::vec3 chunkPos, Shader* shader, Shader* waterShader);
 	~Chunk();
 
 	void GenerateChunk();
-	void Render(unsigned int modelLoc);
+	void Render(Shader* mainShader, Shader* billboardShader);
+	void RenderWater(Shader* shader);
+	unsigned int GetBlockAtPos(int x, int y, int z);
 
 public:
 	std::vector<unsigned int> chunkData;
@@ -39,13 +25,19 @@ public:
 	bool generated;
 
 private:
-	unsigned int vertexArrayObject;
-	unsigned int vbo, ebo;
 	unsigned int chunkSize;
-	unsigned int numTriangles;
 	glm::vec3 worldPos;
 	std::thread chunkThread;
 
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	std::vector<Vertex> mainVertices;
+	std::vector<unsigned int> mianIndices;
+	std::vector<WaterVertex> waterVertices;
+	std::vector<unsigned int> waterIndices;
+	std::vector<BillboardVertex> billboardVertices;
+	std::vector<unsigned int> billboardIndices;
+
+	unsigned int mainVAO, waterVAO, billboardVAO;
+	unsigned int mainVBO, mainEBO, waterVBO, waterEBO, billboardVBO, billboardEBO;
+	unsigned int numTrianglesMain, numTrianglesWater, numTrianglesBillboard;
+	unsigned int modelLoc;
 };

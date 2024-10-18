@@ -7,27 +7,28 @@
 namespace Blocks
 {
 	const std::vector<Block> blocks{
-		Block(0, 0, 0, 0, true),			// Air block
-		Block(0, 0, 1, 1),					// Dirt block
+		Block(0, 0, 0, 0, Block::TRANSPARENT),		// Air block
+		Block(0, 0, 1, 1, Block::SOLID),		// Dirt block
 
-		Block(1, 1, 2, 2,					// Grass block
+		Block(1, 1, 2, 2,						// Grass block
 			  0, 0, 1, 1,
-			  1, 0, 2, 1),
+			  1, 0, 2, 1, Block::SOLID),
 
-		Block(0, 1, 1, 2),					// Stone block
+		Block(0, 1, 1, 2, Block::SOLID),		// Stone block
 
-		Block(2, 1, 3, 2,					// Log
+		Block(2, 1, 3, 2,						// Log
 			  2, 1, 3, 2,
-			  2, 0, 3, 1),
+			  2, 0, 3, 1, Block::SOLID),
 
-		Block(0, 2, 1, 3, true),			// Leaves
-		Block(1, 2, 2, 3, true, true),		// Grass
-		Block(3, 0, 4, 1, true, true),		// Tall Grass Bottom
-		Block(3, 1, 4, 2, true, true),		// Tall Grass Top
-		Block(0, 3, 1, 4, true, true),		// Poppy
-		Block(2, 2, 3, 3, true, true),		// White Tulip
-		Block(3, 2, 4, 3, true, true),		// Pink Tulip
-		Block(1, 3, 2, 4, true, true),		// Orange Tulip
+		Block(0, 2, 1, 3, Block::LEAVES),		// Leaves
+		Block(1, 2, 2, 3, Block::BILLBOARD),	// Grass
+		Block(3, 0, 4, 1, Block::BILLBOARD),	// Tall Grass Bottom
+		Block(3, 1, 4, 2, Block::BILLBOARD),	// Tall Grass Top
+		Block(0, 3, 1, 4, Block::BILLBOARD),	// Poppy
+		Block(2, 2, 3, 3, Block::BILLBOARD),	// White Tulip
+		Block(3, 2, 4, 3, Block::BILLBOARD),	// Pink Tulip
+		Block(1, 3, 2, 4, Block::BILLBOARD),	// Orange Tulip
+		Block(0, 4, 1, 5, Block::LIQUID)		// Water
 	};
 
 	enum BLOCKS
@@ -45,5 +46,6 @@ namespace Blocks
 		WHITE_TULIP = 10,
 		PINK_TULIP = 11,
 		ORANGE_TULIP = 12,
+		WATER = 13
 	};
 }

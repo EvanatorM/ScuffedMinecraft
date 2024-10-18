@@ -15,7 +15,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 	// Init noise settings
 	static NoiseSettings surfaceSettings[]{
 		{ 0.01f, 20.0f, 0 },
-		{ 0.1f,   3.0f, 0 }
+		{ 0.05f,   3.0f, 0 }
 	};
 	static int surfaceSettingsLength = sizeof(surfaceSettings) / sizeof(*surfaceSettings);
 
@@ -30,70 +30,151 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 	static int oreSettingsLength = sizeof(oreSettings) / sizeof(*oreSettings);
 
 	static SurfaceFeature surfaceFeatures[]{
+		// Pond
+		{
+			{ 0.43f, 1.0f, 2.35f, .85f, 1, 0 },	// Noise
+			{									// Blocks
+				0, 0, 0,  0,  0,  0, 0,
+				0, 0, 0,  0,  0,  0, 0,
+				0, 0, 0,  13, 13, 0, 0,
+				0, 0, 13, 13, 13, 0, 0,
+				0, 0, 0,  13, 0,  0, 0,
+				0, 0, 0,  0,  0,  0, 0,
+				0, 0, 0,  0,  0,  0, 0,
+				
+				0, 2,  13, 13, 2,  0,  0,
+				0, 2,  13, 13, 13, 2,  0,
+				2, 13, 13, 13, 13, 13, 2,
+				2, 13, 13, 13, 13, 13, 2,
+				2, 13, 13, 13, 13, 13, 2,
+				0, 2,  13, 13, 13, 2,  0,
+				0, 0,  2,  13, 2,  0,  0,
+
+				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0,
+			},								
+			{									// Replace?
+				false, false, false, false, false, false, false,
+				false, false, false, false, false, false, false,
+				false, false, false, true,  true,  false, false,
+				false, false, true,  true,  true,  false, false,
+				false, false, false, true,  false, false, false,
+				false, false, false, false, false, false, false,
+				false, false, false, false, false, false, false,
+				
+				false, false, true,  true, false, false, false,
+				false, false, true,  true, true,  false, false,
+				false, true,  true,  true, true,  true,  false,
+				false, true,  true,  true, true,  true,  false,
+				false, true,  true,  true, true,  true,  false,
+				false, false, true,  true, true,  false, false,
+				false, false, false, true, false, false, false,
+
+				false, false, true,  true, false, false, false,
+				false, false, true,  true, true,  true,  false,
+				false, true,  true,  true, true,  true,  false,
+				false, true,  true,  true, true,  true,  false,
+				false, true,  true,  true, true,  true,  false,
+				false, false, true,  true, true,  false, false,
+				false, false, false, true, false, false, false,
+			},							
+			7, 3, 7,							// Size
+			-3, -2, -3							// Offset
+		},
 		// Tree
 		{
 			{ 4.23f, 1.0f, 8.54f, .8f, 1, 0 },
 			{ 
-				0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 1, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
 
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 5, 0,
-				0, 0, 0, 5, 5, 5, 5,
-				0, 0, 0, 5, 5, 5, 0,
-				0, 0, 0, 5, 5, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 4, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
 
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 5, 5,
-				1, 4, 4, 4, 4, 5, 5,
-				0, 0, 0, 5, 5, 5, 5,
-				0, 0, 0, 5, 5, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 4, 0, 0,
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0,
 
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 5, 0,
-				0, 0, 0, 5, 5, 5, 5,
-				0, 0, 0, 5, 5, 5, 0,
-				0, 0, 0, 5, 5, 0, 0,
+				0, 5, 5, 5, 0,
+				5, 5, 5, 5, 5,
+				5, 5, 4, 5, 5,
+				5, 5, 5, 5, 5,
+				0, 5, 5, 5, 0,
 
-				0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 5, 5, 0, 0,
-				0, 0, 0, 0, 0, 0, 0,
+				0, 5, 5, 5, 0,
+				5, 5, 5, 5, 5,
+				5, 5, 4, 5, 5,
+				5, 5, 5, 5, 5,
+				0, 5, 5, 5, 0,
+
+				0, 0, 0, 0, 0,
+				0, 0, 5, 0, 0,
+				0, 5, 5, 5, 0,
+				0, 0, 5, 0, 0,
+				0, 0, 0, 0, 0,
+
+				0, 0, 0, 0, 0,
+				0, 0, 5, 0, 0,
+				0, 5, 5, 5, 0,
+				0, 0, 5, 0, 0,
+				0, 0, 0, 0, 0,
+
 			},
 			{ 
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, true,  false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
 
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, true,  false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
 
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				true,  true,  true,  true,  true,  false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, true,  false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
 
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, true,  false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
 
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
-				false, false, false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, true,  false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
+				false, false, false, false, false,
 			},
 			5,
 			7,
@@ -101,22 +182,6 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 			-2,
 			0,
 			-2
-		},
-		// Grass
-		{
-			{ 2.65f, 1.0f, 8.54f, .5f, 1, 0 },
-			{
-				2, 6
-			},
-			{
-				false, false
-			},
-			1,
-			2,
-			1,
-			0,
-			0,
-			0
 		},
 		// Tall Grass
 		{
@@ -129,6 +194,22 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 			},
 			1,
 			3,
+			1,
+			0,
+			0,
+			0
+		},
+		// Grass
+		{
+			{ 2.65f, 1.0f, 8.54f, .5f, 1, 0 },
+			{
+				2, 6
+			},
+			{
+				false, false
+			},
+			1,
+			2,
 			1,
 			0,
 			0,
@@ -201,6 +282,8 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 	};
 	static int surfaceFeaturesLength = sizeof(surfaceFeatures) / sizeof(*surfaceFeatures);
 
+	static int waterLevel = 20;
+
 	// Set vector size
 	chunkData->reserve(chunkSize * chunkSize * chunkSize);
 
@@ -249,9 +332,14 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 
 				// Sky and Caves
 				if (y + startY > noiseY)
-					chunkData->push_back(0);
+				{
+					if (y + startY <= waterLevel)
+						chunkData->push_back(Blocks::WATER);
+					else
+						chunkData->push_back(Blocks::AIR);
+				}
 				else if (cave)
-					chunkData->push_back(0);
+					chunkData->push_back(Blocks::AIR);
 				// Ground
 				else
 				{
@@ -307,6 +395,10 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 
 				if (noiseY + surfaceFeatures[i].offsetY > startY + 32 || noiseY + surfaceFeatures[i].sizeY + surfaceFeatures[i].offsetY < startY)
 					continue;
+
+				// Check if it's in water
+				if (noiseY < waterLevel)
+					continue;
 				
 				// Check if it's in a cave
 				bool cave = false;
@@ -361,9 +453,9 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 								if (localZ >= 32 || localZ < 0)
 									continue;
 								
-								int featureIndex = fX * surfaceFeatures[i].sizeZ * surfaceFeatures[i].sizeY + 
-									fZ * surfaceFeatures[i].sizeY + 
-									fY;
+								int featureIndex = fY * surfaceFeatures[i].sizeX * surfaceFeatures[i].sizeZ + 
+									fX * surfaceFeatures[i].sizeZ  + 
+									fZ;
 								//std::cout << "Feature Index: " << featureIndex << '\n';
 								int localIndex = localX * chunkSize * chunkSize + localZ * chunkSize + localY;
 								//std::cout << "Local Index: " << localIndex << ", Max Index: " << chunkData->size() << '\n';
@@ -373,11 +465,6 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 							}
 						}
 					}
-
-					//int index = x * chunkSize * chunkSize + z * chunkSize + noiseY;
-					//chunkData->at(index) = surfaceFeatures[i].block;
-					//index = x * chunkSize * chunkSize + z * chunkSize + noiseY + 1;
-					//chunkData->at(index) = surfaceFeatures[i].block;
 				}
 			}
 		}

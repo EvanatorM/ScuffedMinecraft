@@ -180,6 +180,7 @@
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\SurfaceFeature.h" />
+    <ClInclude Include="src\Vertex.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />
     <ClInclude Include="vendor\imgui\imgui.h" />
     <ClInclude Include="vendor\imgui\imgui_impl_glfw.h" />
@@ -193,8 +194,14 @@
     <ClInclude Include="vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\fragment_shader.glsl" />
-    <None Include="assets\shaders\vertex_shader.glsl" />
+    <None Include="assets\shaders\billboard_frag.glsl" />
+    <None Include="assets\shaders\billboard_vert.glsl" />
+    <None Include="assets\shaders\framebuffer_frag.glsl" />
+    <None Include="assets\shaders\framebuffer_vert.glsl" />
+    <None Include="assets\shaders\main_frag.glsl" />
+    <None Include="assets\shaders\main_vert.glsl" />
+    <None Include="assets\shaders\water_frag.glsl" />
+    <None Include="assets\shaders\water_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\block_map.png" />
