@@ -39,6 +39,8 @@ bool escapeDown = false;
 float windowX = 1920;
 float windowY = 1080;
 
+GLuint framebufferTexture;
+
 Camera camera;
 
 // Window options
@@ -120,7 +122,6 @@ int main()
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-	unsigned int framebufferTexture;
 	glGenTextures(1, &framebufferTexture);
 	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowX, windowY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -220,7 +221,7 @@ int main()
 			highestFps = fps;
 		fpsCount++;
 		std::chrono::steady_clock::time_point currentTimePoint = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTimePoint - fpsStartTime).count() > 1000)
+		if (std::chrono::duration_cast<std::chrono::seconds>(currentTimePoint - fpsStartTime).count() >= 1)
 		{
 			avgFps = fpsCount;
 			lowestFps = -1;
@@ -345,6 +346,10 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	windowX = width;
 	windowY = height;
 	glViewport(0, 0, width, height);
+	// Resize the framebuffer texture
+	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void processInput(GLFWwindow* window)
