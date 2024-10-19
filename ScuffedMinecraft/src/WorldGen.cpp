@@ -310,14 +310,16 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 			{
 				// Cave noise
 				bool cave = false;
+				int currentY = y + startY;
+				
 				for (int i = 0; i < caveSettingsLength; i++)
 				{
-					if (y + startY > caveSettings[i].maxHeight)
+					if (currentY > caveSettings[i].maxHeight)
 						continue;
 
 					float noiseCaves = noise3D.eval(
 						(float)((x + startX) * caveSettings[i].frequency) + caveSettings[i].offset,
-						(float)((y + startY) * caveSettings[i].frequency) + caveSettings[i].offset,
+						(float)((currentY) * caveSettings[i].frequency) + caveSettings[i].offset,
 						(float)((z + startZ) * caveSettings[i].frequency) + caveSettings[i].offset)
 						* caveSettings[i].amplitude;
 
@@ -331,49 +333,49 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				// Step 1: Terrain Shape (surface and caves) and Ores
 
 				// Sky and Caves
-				if (y + startY > noiseY)
+				if (currentY > noiseY)
 				{
-					if (y + startY <= waterLevel)
+					if (currentY <= waterLevel)
 						chunkData->push_back(Blocks::WATER);
 					else
 						chunkData->push_back(Blocks::AIR);
+					continue;
 				}
-				else if (cave)
+				else if (cave) {
 					chunkData->push_back(Blocks::AIR);
+					continue;
+				}
+				
 				// Ground
-				else
+				bool blockSet = false;
+				for (int i = 0; i < oreSettingsLength; i++)
 				{
-					bool blockSet = false;
-					for (int i = 0; i < oreSettingsLength; i++)
+					if (currentY > oreSettings[i].maxHeight)
+						continue;
+
+					float noiseOre = noise3D.eval(
+						(float)((x + startX) * oreSettings[i].frequency) + oreSettings[i].offset,
+						(float)((currentY) * oreSettings[i].frequency) + oreSettings[i].offset,
+						(float)((z + startZ) * oreSettings[i].frequency) + oreSettings[i].offset)
+						* oreSettings[i].amplitude;
+
+					if (noiseOre > oreSettings[i].chance)
 					{
-						if (y + startY > oreSettings[i].maxHeight)
-							continue;
-
-						float noiseOre = noise3D.eval(
-							(float)((x + startX) * oreSettings[i].frequency) + oreSettings[i].offset,
-							(float)((y + startY) * oreSettings[i].frequency) + oreSettings[i].offset,
-							(float)((z + startZ) * oreSettings[i].frequency) + oreSettings[i].offset)
-							* oreSettings[i].amplitude;
-
-						if (noiseOre > oreSettings[i].chance)
-						{
-							chunkData->push_back(oreSettings[i].block);
-							blockSet = true;
-							break;
-						}
-					}
-
-					if (!blockSet)
-					{
-						if (y + startY == noiseY and noiseY < waterLevel)
-							chunkData->push_back(Blocks::GRASS_BLOCK);
-						else if (y + startY > 10)
-							chunkData->push_back(Blocks::DIRT_BLOCK);
-						else
-							chunkData->push_back(Blocks::STONE_BLOCK);
+						chunkData->push_back(oreSettings[i].block);
+						blockSet = true;
+						break;
 					}
 				}
-			}
+
+				if (blockSet)
+					continue;
+				
+				if (currentY == noiseY and noiseY < waterLevel)
+					chunkData->push_back(Blocks::GRASS_BLOCK);
+				else if (currentY > 10)
+					chunkData->push_back(Blocks::DIRT_BLOCK);
+				else
+					chunkData->push_back(Blocks::STONE_BLOCK);
 		}
 	}
 
@@ -404,7 +406,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				bool cave = false;
 				for (int i = 0; i < caveSettingsLength; i++)
 				{
-					if (noiseY + startY > caveSettings[i].maxHeight)
+					if (noisecurrentY > caveSettings[i].maxHeight)
 						continue;
 
 					float noiseCaves = noise3D.eval(
