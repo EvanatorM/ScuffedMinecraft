@@ -184,6 +184,57 @@ int main()
 	else
 	{
 		std::cout << "Failed to load texture\n";
+		// Use fallbacks
+		width = 256;
+		height = 256;
+		unsigned char* whiteTexture = new unsigned char[width * height * 4]; // RGBA
+		
+		int errorTexture = 1;  // 0 = white, 1 = checkerboard, 2 = colourful
+		
+		// Helper function to set RGBA values
+		auto setPixel = [](unsigned char* texture, int index, int r, int g, int b, int alpha) {
+			texture[index] = r;
+			texture[index + 1] = g;
+			texture[index + 2] = b;
+			texture[index + 3] = alpha;
+		};
+		
+		// Default to white
+		int r = 255, g = 255, b = 255;
+		
+		for (int y = 0; y < height; ++y)
+			{
+			int alpha = (y >= 64 && y < 96) ? 218 : 255; // Water transparency
+			
+			for (int x = 0; x < width; ++x)
+			{
+				if (errorTexture == 1)
+				{
+					// Checkerboard pattern
+					r = g = b = 0;
+					if ((x % 16 < 8) ^ (y % 16 < 8))
+						r = b = 255;
+				}
+				else if (errorTexture == 2)
+				{
+					// Colorful pattern, distinct color for each block
+					int spriteX = x / 16, spriteY = y / 16;
+					r = spriteX * 16;
+					g = spriteY * 16;
+					b = (spriteX + spriteY) * 8;
+				}
+				
+				int i = (y * width + x) * 4;
+				setPixel(whiteTexture, i, r, g, b, alpha);
+			}
+		}
+
+		// Upload the white texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteTexture);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Clean up
+		delete[] whiteTexture;
 	}
 
 	stbi_image_free(data);
