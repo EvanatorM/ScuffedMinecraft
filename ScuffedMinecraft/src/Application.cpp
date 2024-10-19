@@ -2,6 +2,10 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#ifdef LINUX
+#include <cstdlib>
+#endif
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -56,8 +60,26 @@ float rectangleVertices[] =
 	-1.0f,  1.0f,  0.0f, 1.0f
 };
 
-int main()
-{
+int main (int argc, char *argv[]) {
+#ifdef LINUX
+  char* resolved_path = realpath(argv[0],NULL);
+  if (resolved_path == NULL) {
+    printf("%s: Please do not place binary in PATH\n", argv[0]);
+    exit(1);
+  }
+  size_t resolved_length = strlen(resolved_path);
+
+  // remove executable from path
+  for (size_t i = resolved_length; i > 0; i--) {
+    if (resolved_path[i] == '/' && resolved_path[i+1] != 0) {
+      resolved_path[i+1] = 0;
+      break;
+    }  
+  }
+  chdir(resolved_path);
+  free(resolved_path);
+#endif
+
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
