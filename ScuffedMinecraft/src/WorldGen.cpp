@@ -412,7 +412,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				bool cave = false;
 				for (int i = 0; i < caveSettingsLength; i++)
 				{
-					if (noisecurrentY > caveSettings[i].maxHeight)
+					if (noiseY + startY > caveSettings[i].maxHeight)
 						continue;
 
 					float noiseCaves = noise3D.eval(
