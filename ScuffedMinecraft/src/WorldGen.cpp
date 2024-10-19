@@ -347,7 +347,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				if (currentY > noiseY and currentY <= waterLevel)
 					// TODO: This is where wet stuff goes
 					chunkData->push_back(Blocks::WATER);
-					continue
+					continue;
 				}
 				
 				// Ground
