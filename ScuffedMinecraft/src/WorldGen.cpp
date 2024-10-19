@@ -365,7 +365,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 
 					if (!blockSet)
 					{
-						if (y + startY == noiseY)
+						if (y + startY == noiseY and noiseY < waterLevel)
 							chunkData->push_back(Blocks::GRASS_BLOCK);
 						else if (y + startY > 10)
 							chunkData->push_back(Blocks::DIRT_BLOCK);
