@@ -338,16 +338,15 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				}
 
 				// Step 1: Terrain Shape (surface and caves) and Ores
-				if (cave) {
-					// TODO: This is where cave stuff goes
-					chunkData->push_back(Blocks::AIR);
-					continue;
-				}
 				
 				if (currentY > noiseY and currentY <= waterLevel)
 				{
 					// TODO: This is where wet stuff goes
 					chunkData->push_back(Blocks::WATER);
+					continue;
+				} else if (cave) {
+					// TODO: This is where cave stuff goes
+					chunkData->push_back(Blocks::AIR);
 					continue;
 				}
 				
