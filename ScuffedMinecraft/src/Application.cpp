@@ -4,6 +4,9 @@
 
 #ifdef LINUX
 #include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 #include <glad/glad.h>
@@ -73,9 +76,22 @@ int main (int argc, char *argv[]) {
   for (size_t i = resolved_length; i > 0; i--) {
     if (resolved_path[i] == '/' && resolved_path[i+1] != 0) {
       resolved_path[i+1] = 0;
+      resolved_length = i;
       break;
     }  
   }
+
+  char* assets_path = (char *)malloc(resolved_length + strlen("assets") + 2);
+  strcpy(assets_path, resolved_path);
+  strcpy(assets_path + resolved_length + 1, "assets");
+  struct stat path_stat;
+  if(stat(assets_path, &path_stat) == -1 || !S_ISDIR(path_stat.st_mode)) {
+    printf("%s: Asset directory not found\n", argv[0]);
+    exit(1);
+  }
+
+  free(assets_path);
+  
   chdir(resolved_path);
   free(resolved_path);
 #endif
