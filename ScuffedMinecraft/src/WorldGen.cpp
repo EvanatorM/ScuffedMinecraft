@@ -308,10 +308,17 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 
 			for (int y = 0; y < chunkSize; y++)
 			{
-				// Cave noise
-				bool cave = false;
 				int currentY = y + startY;
 				
+				if (currentY > noiseY and currentY > waterLevel)
+				{
+					// Sky is air, no need to process
+					chunkData->push_back(Blocks::AIR);
+					continue;
+				}
+				
+				// Cave noise
+				bool cave = false;
 				for (int i = 0; i < caveSettingsLength; i++)
 				{
 					if (currentY > caveSettings[i].maxHeight)
@@ -331,19 +338,16 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				}
 
 				// Step 1: Terrain Shape (surface and caves) and Ores
-
-				// Sky and Caves
-				if (currentY > noiseY)
-				{
-					if (currentY <= waterLevel)
-						chunkData->push_back(Blocks::WATER);
-					else
-						chunkData->push_back(Blocks::AIR);
-					continue;
-				}
-				else if (cave) {
+				if (cave) {
+					// TODO: This is where cave stuff goes
 					chunkData->push_back(Blocks::AIR);
 					continue;
+				}
+				
+				if (currentY > noiseY and currentY <= waterLevel)
+					// TODO: This is where wet stuff goes
+					chunkData->push_back(Blocks::WATER);
+					continue
 				}
 				
 				// Ground
