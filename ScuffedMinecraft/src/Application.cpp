@@ -40,6 +40,7 @@ float windowX = 1920;
 float windowY = 1080;
 
 GLuint framebufferTexture;
+GLuint depthTexture;
 
 Camera camera;
 
@@ -49,13 +50,13 @@ Camera camera;
 float rectangleVertices[] =
 {
 	 // Coords     // TexCoords
-	 1.0f, -1.0f,  1.0f, 0.0f,
 	-1.0f, -1.0f,  0.0f, 0.0f,
 	-1.0f,  1.0f,  0.0f, 1.0f,
-
-	 1.0f,  1.0f,  1.0f, 1.0f,
 	 1.0f, -1.0f,  1.0f, 0.0f,
-	-1.0f,  1.0f,  0.0f, 1.0f
+
+	 1.0f, -1.0f,  1.0f, 0.0f,
+	-1.0f,  1.0f,  0.0f, 1.0f,
+	 1.0f,  1.0f,  1.0f, 1.0f,
 };
 
 int main()
@@ -131,7 +132,6 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
-	unsigned int depthTexture;
 	glGenTextures(1, &depthTexture);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -237,6 +237,8 @@ int main()
 		processInput(window);
 
 		// Rendering
+		glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
+
 		glEnable(GL_DEPTH_TEST);
 		glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -309,18 +311,23 @@ int main()
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glBindVertexArray(rectVAO);
 		glDisable(GL_DEPTH_TEST);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, framebufferTexture);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		// disabled so that the screen renders
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// Draw ImGui UI
 		ImGui::Begin("Test");
 		ImGui::Text("FPS: %f (Avg: %f, Min: %f, Max: %f)", fps, avgFps, lowestFps, highestFps);
-		ImGui::Text("MS: %f", deltaTime * 100.0f);
+		ImGui::Text("MS: %f", deltaTime * 1000.f);
+		ImGui::Text("Facing: %.1f/%.1f", camera.Pitch, camera.Yaw);
+		ImGui::Text("Pos: %.2f, %.2f, %.2f", camera.Position.x, camera.Position.y, camera.Position.z);
 		ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
 		ImGui::End();
 
@@ -341,7 +348,7 @@ int main()
 	glfwTerminate();
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height)
+void framebufferSizeCallback(GLFWwindow*  window, int width, int height)
 {
 	windowX = width;
 	windowY = height;
@@ -350,6 +357,9 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	// resize depth buffer texture
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
 void processInput(GLFWwindow* window)
