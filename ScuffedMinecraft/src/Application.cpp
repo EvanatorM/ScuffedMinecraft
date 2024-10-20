@@ -2,6 +2,13 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#ifdef LINUX
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -59,8 +66,39 @@ float rectangleVertices[] =
 	-1.0f,  1.0f,  0.0f, 1.0f
 };
 
-int main()
-{
+int main (int argc, char *argv[]) {
+#ifdef LINUX
+  char* resolved_path = realpath(argv[0],NULL);
+  if (resolved_path == NULL) {
+    printf("%s: Please do not place binary in PATH\n", argv[0]);
+    exit(1);
+  }
+  size_t resolved_length = strlen(resolved_path);
+
+  // remove executable from path
+  for (size_t i = resolved_length; i > 0; i--) {
+    if (resolved_path[i] == '/' && resolved_path[i+1] != 0) {
+      resolved_path[i+1] = 0;
+      resolved_length = i;
+      break;
+    }  
+  }
+
+  char* assets_path = (char *)malloc(resolved_length + strlen("assets") + 2);
+  strcpy(assets_path, resolved_path);
+  strcpy(assets_path + resolved_length + 1, "assets");
+  struct stat path_stat;
+  if(stat(assets_path, &path_stat) == -1 || !S_ISDIR(path_stat.st_mode)) {
+    printf("%s: Asset directory not found\n", argv[0]);
+    exit(1);
+  }
+
+  free(assets_path);
+  
+  chdir(resolved_path);
+  free(resolved_path);
+#endif
+
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
