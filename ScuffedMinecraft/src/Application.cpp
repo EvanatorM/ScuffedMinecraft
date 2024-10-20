@@ -41,6 +41,9 @@ float windowY = 1080;
 
 Camera camera;
 
+GLuint framebufferTexture;
+GLuint depthTexture;
+
 // Window options
 #define VSYNC 1 // 0 for off, 1 for on
 
@@ -120,7 +123,6 @@ int main()
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
-	unsigned int framebufferTexture;
 	glGenTextures(1, &framebufferTexture);
 	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowX, windowY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -130,7 +132,6 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebufferTexture, 0);
 
-	unsigned int depthTexture;
 	glGenTextures(1, &depthTexture);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -220,7 +221,7 @@ int main()
 			highestFps = fps;
 		fpsCount++;
 		std::chrono::steady_clock::time_point currentTimePoint = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTimePoint - fpsStartTime).count() > 1000)
+		if (std::chrono::duration_cast<std::chrono::seconds>(currentTimePoint - fpsStartTime).count() >= 1)
 		{
 			avgFps = fpsCount;
 			lowestFps = -1;
@@ -345,6 +346,14 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	windowX = width;
 	windowY = height;
 	glViewport(0, 0, width, height);
+
+	// resize framebuffer texture
+	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowX, windowY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	// resize framebuffer depth texture
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
 void processInput(GLFWwindow* window)
