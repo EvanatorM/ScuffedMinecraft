@@ -157,11 +157,14 @@
     <ClCompile Include="src\Block.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\ChunkData.cpp" />
+    <ClCompile Include="src\ChunkPos.cpp" />
     <ClCompile Include="src\NoiseSettings.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Planet.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\SurfaceFeature.cpp" />
-    <ClCompile Include="src\TupleHash.h" />
+    <ClCompile Include="src\ChunkPosHash.h" />
     <ClCompile Include="src\WorldGen.cpp" />
     <ClCompile Include="src\WorldGen.h" />
     <ClCompile Include="vendor\glad.c" />
@@ -178,7 +181,10 @@
     <ClInclude Include="src\Blocks.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Chunk.h" />
+    <ClInclude Include="src\ChunkData.h" />
+    <ClInclude Include="src\ChunkPos.h" />
     <ClInclude Include="src\NoiseSettings.h" />
+    <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\SurfaceFeature.h" />
@@ -198,6 +204,10 @@
   <ItemGroup>
     <None Include="assets\shaders\billboard_frag.glsl" />
     <None Include="assets\shaders\billboard_vert.glsl" />
+    <None Include="assets\shaders\block_outline_frag.glsl" />
+    <None Include="assets\shaders\block_outline_vert.glsl" />
+    <None Include="assets\shaders\crosshair_frag.glsl" />
+    <None Include="assets\shaders\crosshair_vert.glsl" />
     <None Include="assets\shaders\framebuffer_frag.glsl" />
     <None Include="assets\shaders\framebuffer_vert.glsl" />
     <None Include="assets\shaders\main_frag.glsl" />
@@ -207,6 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\block_map.png" />
+    <Image Include="assets\sprites\crosshair.png" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="vendor\imgui\LICENSE.txt" />

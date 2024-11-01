@@ -3,9 +3,10 @@
 #include <vector>
 #include "NoiseSettings.h"
 #include "SurfaceFeature.h"
+#include "ChunkData.h"
+#include "glm/glm.hpp"
 
 namespace WorldGen
 {
-	void GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSize, std::vector<unsigned int>* chunkData);
-
+	void GenerateChunkData(ChunkPos chunkPos, uint16_t* chunkData);
 }

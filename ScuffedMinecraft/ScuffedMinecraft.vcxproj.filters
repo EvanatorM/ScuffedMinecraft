@@ -33,7 +33,7 @@
     <ClCompile Include="src\Block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\TupleHash.h">
+    <ClCompile Include="src\ChunkPosHash.h">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\WorldGen.h">
@@ -70,6 +70,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SurfaceFeature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Physics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChunkPos.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChunkData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -134,6 +143,15 @@
     <ClInclude Include="src\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Physics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ChunkPos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ChunkData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\main_vert.glsl" />
@@ -144,9 +162,16 @@
     <None Include="assets\shaders\billboard_frag.glsl" />
     <None Include="assets\shaders\framebuffer_vert.glsl" />
     <None Include="assets\shaders\framebuffer_frag.glsl" />
+    <None Include="assets\shaders\block_outline_vert.glsl" />
+    <None Include="assets\shaders\block_outline_frag.glsl" />
+    <None Include="assets\shaders\crosshair_frag.glsl" />
+    <None Include="assets\shaders\crosshair_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sprites\block_map.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\sprites\crosshair.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

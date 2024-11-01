@@ -10,14 +10,13 @@
 #include "Blocks.h"
 #include "WorldGen.h"
 
-Chunk::Chunk(unsigned int chunkSize, glm::vec3 chunkPos, Shader* shader, Shader* waterShader)
-	: chunkSize(chunkSize), chunkPos(chunkPos)
+Chunk::Chunk(ChunkPos chunkPos, Shader* shader, Shader* waterShader)
+	: chunkPos(chunkPos)
 {
-	worldPos = glm::vec3(chunkPos.x * chunkSize, chunkPos.y * chunkSize, chunkPos.z * chunkSize);
+	worldPos = glm::vec3(chunkPos.x * (float)CHUNK_SIZE, chunkPos.y * (float)CHUNK_SIZE, chunkPos.z * (float)CHUNK_SIZE);
 
 	ready = false;
 	generated = false;
-	chunkThread = std::thread(&Chunk::GenerateChunk, this);
 }
 
 Chunk::~Chunk()
@@ -38,47 +37,41 @@ Chunk::~Chunk()
 	glDeleteVertexArrays(1, &billboardVAO);
 }
 
-void Chunk::GenerateChunk()
+void Chunk::GenerateChunkMesh()
 {
-	//std::cout << "Started thread: " << std::this_thread::get_id() << '\n';
-
-	WorldGen::GenerateChunkData(chunkPos.x, chunkPos.y, chunkPos.z, chunkSize, &chunkData);
-	std::vector<unsigned int> northData, southData, eastData, westData, upData, downData;
-
-	WorldGen::GenerateChunkData(chunkPos.x,     chunkPos.y,     chunkPos.z - 1, chunkSize, &northData);
-	WorldGen::GenerateChunkData(chunkPos.x,     chunkPos.y,     chunkPos.z + 1, chunkSize, &southData);
-	WorldGen::GenerateChunkData(chunkPos.x + 1, chunkPos.y,     chunkPos.z, chunkSize, &eastData);
-	WorldGen::GenerateChunkData(chunkPos.x - 1, chunkPos.y,     chunkPos.z, chunkSize, &westData);
-	WorldGen::GenerateChunkData(chunkPos.x,     chunkPos.y + 1, chunkPos.z, chunkSize, &upData);
-	WorldGen::GenerateChunkData(chunkPos.x,     chunkPos.y - 1, chunkPos.z, chunkSize, &downData);
-
-	//std::cout << "Got chunk data in thread: " << std::this_thread::get_id() << '\n';
+	mainVertices.clear();
+	mainIndices.clear();
+	waterVertices.clear();
+	waterIndices.clear();
+	billboardVertices.clear();
+	billboardIndices.clear();
+	numTrianglesMain = 0;
+	numTrianglesWater = 0;
+	numTrianglesBillboard = 0;
 
 	unsigned int currentVertex = 0;
 	unsigned int currentLiquidVertex = 0;
 	unsigned int currentBillboardVertex = 0;
-	for (char x = 0; x < chunkSize; x++)
+	for (char x = 0; x < CHUNK_SIZE; x++)
 	{
-		for (char z = 0; z < chunkSize; z++)
+		for (char z = 0; z < CHUNK_SIZE; z++)
 		{
-			for (char y = 0; y < chunkSize; y++)
+			for (char y = 0; y < CHUNK_SIZE; y++)
 			{
-				int index = x * chunkSize * chunkSize + z * chunkSize + y;
-				if (chunkData[index] == 0)
+				if (chunkData->GetBlock(x, y, z) == 0)
 					continue;
 
-				const Block* block = &Blocks::blocks[chunkData[index]];
+				const Block* block = &Blocks::blocks[chunkData->GetBlock(x, y, z)];
 
 				int topBlock;
-				if (y < chunkSize - 1)
+				if (y < CHUNK_SIZE - 1)
 				{
-					int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (y + 1);
-					topBlock = chunkData[blockIndex];
+					topBlock = chunkData->GetBlock(x, y + 1, z);
 				}
 				else
 				{
-					int blockIndex = x * chunkSize * chunkSize + z * chunkSize + 0;
-					topBlock = upData[blockIndex];
+					int blockIndex = x * CHUNK_SIZE * CHUNK_SIZE + z * CHUNK_SIZE + 0;
+					topBlock = upData->GetBlock(x, 0, z);
 				}
 
 				const Block* topBlockType = &Blocks::blocks[topBlock];
@@ -119,13 +112,11 @@ void Chunk::GenerateChunk()
 						int northBlock;
 						if (z > 0)
 						{
-							int northIndex = x * chunkSize * chunkSize + (z - 1) * chunkSize + y;
-							northBlock = chunkData[northIndex];
+							northBlock = chunkData->GetBlock(x, y, z - 1);
 						}
 						else
 						{
-							int northIndex = x * chunkSize * chunkSize + (chunkSize - 1) * chunkSize + y;
-							northBlock = northData[northIndex];
+							northBlock = northData->GetBlock(x, y, CHUNK_SIZE - 1);
 						}
 
 						const Block* northBlockType = &Blocks::blocks[northBlock];
@@ -157,12 +148,12 @@ void Chunk::GenerateChunk()
 								mainVertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0));
 								mainVertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0));
 
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 3);
-								mianIndices.push_back(currentVertex + 1);
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 2);
-								mianIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 1);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 2);
+								mainIndices.push_back(currentVertex + 3);
 								currentVertex += 4;
 							}
 						}
@@ -171,15 +162,13 @@ void Chunk::GenerateChunk()
 					// South
 					{
 						int southBlock;
-						if (z < chunkSize - 1)
+						if (z < CHUNK_SIZE - 1)
 						{
-							int southIndex = x * chunkSize * chunkSize + (z + 1) * chunkSize + y;
-							southBlock = chunkData[southIndex];
+							southBlock = chunkData->GetBlock(x, y, z + 1);
 						}
 						else
 						{
-							int southIndex = x * chunkSize * chunkSize + 0 * chunkSize + y;
-							southBlock = southData[southIndex];
+							southBlock = southData->GetBlock(x, y, 0);
 						}
 
 						const Block* southBlockType = &Blocks::blocks[southBlock];
@@ -211,12 +200,12 @@ void Chunk::GenerateChunk()
 								mainVertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1));
 								mainVertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1));
 
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 3);
-								mianIndices.push_back(currentVertex + 1);
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 2);
-								mianIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 1);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 2);
+								mainIndices.push_back(currentVertex + 3);
 								currentVertex += 4;
 							}
 						}
@@ -227,13 +216,11 @@ void Chunk::GenerateChunk()
 						int westBlock;
 						if (x > 0)
 						{
-							int blockIndex = (x - 1) * chunkSize * chunkSize + z * chunkSize + y;
-							westBlock = chunkData[blockIndex];
+							westBlock = chunkData->GetBlock(x - 1, y, z);
 						}
 						else
 						{
-							int blockIndex = (chunkSize - 1) * chunkSize * chunkSize + z * chunkSize + y;
-							westBlock = westData[blockIndex];
+							westBlock = westData->GetBlock(CHUNK_SIZE - 1, y, z);
 						}
 
 						const Block* westBlockType = &Blocks::blocks[westBlock];
@@ -265,12 +252,12 @@ void Chunk::GenerateChunk()
 								mainVertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2));
 								mainVertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2));
 
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 3);
-								mianIndices.push_back(currentVertex + 1);
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 2);
-								mianIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 1);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 2);
+								mainIndices.push_back(currentVertex + 3);
 								currentVertex += 4;
 							}
 						}
@@ -279,15 +266,13 @@ void Chunk::GenerateChunk()
 					// East
 					{
 						int eastBlock;
-						if (x < chunkSize - 1)
+						if (x < CHUNK_SIZE - 1)
 						{
-							int blockIndex = (x + 1) * chunkSize * chunkSize + z * chunkSize + y;
-							eastBlock = chunkData[blockIndex];
+							eastBlock = chunkData->GetBlock(x + 1, y, z);
 						}
 						else
 						{
-							int blockIndex = 0 * chunkSize * chunkSize + z * chunkSize + y;
-							eastBlock = eastData[blockIndex];
+							eastBlock = eastData->GetBlock(0, y, z);
 						}
 
 						const Block* eastBlockType = &Blocks::blocks[eastBlock];
@@ -319,12 +304,12 @@ void Chunk::GenerateChunk()
 								mainVertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3));
 								mainVertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3));
 
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 3);
-								mianIndices.push_back(currentVertex + 1);
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 2);
-								mianIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 1);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 2);
+								mainIndices.push_back(currentVertex + 3);
 								currentVertex += 4;
 							}
 						}
@@ -335,13 +320,12 @@ void Chunk::GenerateChunk()
 						int bottomBlock;
 						if (y > 0)
 						{
-							int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (y - 1);
-							bottomBlock = chunkData[blockIndex];
+							bottomBlock = chunkData->GetBlock(x, y - 1, z);
 						}
 						else
 						{
-							int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (chunkSize - 1);
-							bottomBlock = downData[blockIndex];
+							//int blockIndex = x * chunkSize * chunkSize + z * chunkSize + (chunkSize - 1);
+							bottomBlock = downData->GetBlock(x, CHUNK_SIZE - 1, z);
 						}
 
 						const Block* bottomBlockType = &Blocks::blocks[bottomBlock];
@@ -373,12 +357,12 @@ void Chunk::GenerateChunk()
 								mainVertices.push_back(Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4));
 								mainVertices.push_back(Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4));
 
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 3);
-								mianIndices.push_back(currentVertex + 1);
-								mianIndices.push_back(currentVertex + 0);
-								mianIndices.push_back(currentVertex + 2);
-								mianIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 3);
+								mainIndices.push_back(currentVertex + 1);
+								mainIndices.push_back(currentVertex + 0);
+								mainIndices.push_back(currentVertex + 2);
+								mainIndices.push_back(currentVertex + 3);
 								currentVertex += 4;
 							}
 						}
@@ -427,12 +411,12 @@ void Chunk::GenerateChunk()
 							mainVertices.push_back(Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5));
 							mainVertices.push_back(Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5));
 
-							mianIndices.push_back(currentVertex + 0);
-							mianIndices.push_back(currentVertex + 3);
-							mianIndices.push_back(currentVertex + 1);
-							mianIndices.push_back(currentVertex + 0);
-							mianIndices.push_back(currentVertex + 2);
-							mianIndices.push_back(currentVertex + 3);
+							mainIndices.push_back(currentVertex + 0);
+							mainIndices.push_back(currentVertex + 3);
+							mainIndices.push_back(currentVertex + 1);
+							mainIndices.push_back(currentVertex + 0);
+							mainIndices.push_back(currentVertex + 2);
+							mainIndices.push_back(currentVertex + 3);
 							currentVertex += 4;
 						}
 					}
@@ -455,7 +439,7 @@ void Chunk::Render(Shader* mainShader, Shader* billboardShader)
 		if (generated)
 		{
 			// Solid
-			numTrianglesMain = mianIndices.size();
+			numTrianglesMain = mainIndices.size();
 
 			glGenVertexArrays(1, &mainVAO);
 			glGenBuffers(1, &mainVBO);
@@ -467,7 +451,7 @@ void Chunk::Render(Shader* mainShader, Shader* billboardShader)
 			glBufferData(GL_ARRAY_BUFFER, mainVertices.size() * sizeof(Vertex), mainVertices.data(), GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mainEBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, mianIndices.size() * sizeof(unsigned int), mianIndices.data(), GL_STATIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, mainIndices.size() * sizeof(unsigned int), mainIndices.data(), GL_STATIC_DRAW);
 
 			glVertexAttribPointer(0, 3, GL_BYTE, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, posX));
 			glEnableVertexAttribArray(0);
@@ -543,7 +527,7 @@ void Chunk::Render(Shader* mainShader, Shader* billboardShader)
 	glDrawElements(GL_TRIANGLES, numTrianglesMain, GL_UNSIGNED_INT, 0);
 
 	// Render billboard mesh
-	billboardShader->use(); 
+	billboardShader->use();
 
 	modelLoc = glGetUniformLocation(billboardShader->ID, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -572,11 +556,128 @@ void Chunk::RenderWater(Shader* shader)
 	glDrawElements(GL_TRIANGLES, numTrianglesWater, GL_UNSIGNED_INT, 0);
 }
 
-unsigned int Chunk::GetBlockAtPos(int x, int y, int z)
+uint16_t Chunk::GetBlockAtPos(int x, int y, int z)
 {
 	if (!ready)
 		return 0;
 
-	int index = x * chunkSize * chunkSize + z * chunkSize + y;
-	return chunkData[index];
+	return chunkData->GetBlock(x, y, z);
+}
+
+void Chunk::UpdateBlock(int x, int y, int z, uint16_t newBlock)
+{
+	chunkData->SetBlock(x, y, z, newBlock);
+
+	GenerateChunkMesh();
+
+	// Main
+	numTrianglesMain = mainIndices.size();
+
+	glBindVertexArray(mainVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mainVBO);
+	glBufferData(GL_ARRAY_BUFFER, mainVertices.size() * sizeof(Vertex), mainVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mainEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mainIndices.size() * sizeof(unsigned int), mainIndices.data(), GL_STATIC_DRAW);
+
+	// Water
+	numTrianglesWater = waterIndices.size();
+
+	glBindVertexArray(waterVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, waterVBO);
+	glBufferData(GL_ARRAY_BUFFER, waterVertices.size() * sizeof(WaterVertex), waterVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, waterEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, waterIndices.size() * sizeof(unsigned int), waterIndices.data(), GL_STATIC_DRAW);
+
+	// Billboard
+	numTrianglesBillboard = billboardIndices.size();;
+
+	glBindVertexArray(billboardVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, billboardVBO);
+	glBufferData(GL_ARRAY_BUFFER, billboardVertices.size() * sizeof(BillboardVertex), billboardVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, billboardEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, billboardIndices.size() * sizeof(unsigned int), billboardIndices.data(), GL_STATIC_DRAW);
+
+
+	if (x == 0)
+	{
+		Chunk* westChunk = Planet::planet->GetChunk({ chunkPos.x - 1, chunkPos.y, chunkPos.z });
+		if (westChunk != nullptr)
+			westChunk->UpdateChunk();
+	}
+	else if (x == CHUNK_SIZE - 1)
+	{
+		Chunk* eastChunk = Planet::planet->GetChunk({ chunkPos.x + 1, chunkPos.y, chunkPos.z });
+		if (eastChunk != nullptr)
+			eastChunk->UpdateChunk();
+	}
+
+	if (y == 0)
+	{
+		Chunk* downChunk = Planet::planet->GetChunk({ chunkPos.x, chunkPos.y - 1, chunkPos.z });
+		if (downChunk != nullptr)
+			downChunk->UpdateChunk();
+	}
+	else if (y == CHUNK_SIZE - 1)
+	{
+		Chunk* upChunk = Planet::planet->GetChunk({ chunkPos.x, chunkPos.y + 1, chunkPos.z });
+		if (upChunk != nullptr)
+			upChunk->UpdateChunk();
+	}
+
+	if (z == 0)
+	{
+		Chunk* northChunk = Planet::planet->GetChunk({ chunkPos.x, chunkPos.y, chunkPos.z - 1 });
+		if (northChunk != nullptr)
+			northChunk->UpdateChunk();
+	}
+	else if (z == CHUNK_SIZE - 1)
+	{
+		Chunk* southChunk = Planet::planet->GetChunk({ chunkPos.x, chunkPos.y, chunkPos.z + 1 });
+		if (southChunk != nullptr)
+			southChunk->UpdateChunk();
+	}
+}
+
+void Chunk::UpdateChunk()
+{
+	GenerateChunkMesh();
+
+	// Main
+	numTrianglesMain = mainIndices.size();
+
+	glBindVertexArray(mainVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mainVBO);
+	glBufferData(GL_ARRAY_BUFFER, mainVertices.size() * sizeof(Vertex), mainVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mainEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mainIndices.size() * sizeof(unsigned int), mainIndices.data(), GL_STATIC_DRAW);
+
+	// Water
+	numTrianglesWater = waterIndices.size();
+
+	glBindVertexArray(waterVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, waterVBO);
+	glBufferData(GL_ARRAY_BUFFER, waterVertices.size() * sizeof(WaterVertex), waterVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, waterEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, waterIndices.size() * sizeof(unsigned int), waterIndices.data(), GL_STATIC_DRAW);
+
+	// Billboard
+	numTrianglesBillboard = billboardIndices.size();
+
+	glBindVertexArray(billboardVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, billboardVBO);
+	glBufferData(GL_ARRAY_BUFFER, billboardVertices.size() * sizeof(BillboardVertex), billboardVertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, billboardEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, billboardIndices.size() * sizeof(unsigned int), billboardIndices.data(), GL_STATIC_DRAW);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 struct Block
 {
 public:
@@ -16,10 +18,11 @@ public:
 	char bottomMinX, bottomMinY, bottomMaxX, bottomMaxY;
 	char sideMinX, sideMinY, sideMaxX, sideMaxY;
 	BLOCK_TYPE blockType;
+	std::string blockName;
 
-	Block(char minX, char minY, char maxX, char maxY, BLOCK_TYPE blockType);
+	Block(char minX, char minY, char maxX, char maxY, BLOCK_TYPE blockType, std::string blockName);
 	Block(char topMinX, char topMinY, char topMaxX, char topMaxY, 
 		char bottomMinX, char bottomMinY, char bottomMaxX, char bottomMaxY,
-		char sideMinX, char sideMinY, char sideMaxX, char sideMaxY, BLOCK_TYPE blockType);
+		char sideMinX, char sideMinY, char sideMaxX, char sideMaxY, BLOCK_TYPE blockType, std::string blockName);
 
 };

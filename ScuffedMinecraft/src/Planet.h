@@ -5,9 +5,15 @@
 #include <string>
 #include <queue>
 #include <glm/glm.hpp>
+#include <thread>
+#include <mutex>
 
+#include "ChunkPos.h"
+#include "ChunkData.h"
 #include "Chunk.h"
-#include "TupleHash.h"
+#include "ChunkPosHash.h"
+
+constexpr unsigned int CHUNK_SIZE = 32;
 
 class Planet
 {
@@ -16,26 +22,38 @@ public:
 	Planet(Shader* solidShader, Shader* waterShader, Shader* billboardShader);
 	~Planet();
 
-	std::vector<unsigned int> GetChunkData(int chunkX, int chunkY, int chunkZ);
-	void Update(float camX, float camY, float camZ);
+	ChunkData* GetChunkData(ChunkPos chunkPos);
+	void Update(glm::vec3 cameraPos);
 
-	Chunk* GetChunk(int chunkX, int chunkY, int chunkZ);
+	Chunk* GetChunk(ChunkPos chunkPos);
+	void ClearChunkQueue();
+
+private:
+	void ChunkThreadUpdate();
 
 // Variables
 public:
 	static Planet* planet;
 	unsigned int numChunks = 0, numChunksRendered = 0;
-	static const unsigned int chunkSize;
+	int renderDistance = 10;
+	int renderHeight = 3;
 
 private:
-	std::unordered_map<std::tuple<int, int, int>, Chunk> chunks;
-	std::queue<glm::vec3> chunkQueue;
-	int renderDistance = 3;
-	int renderHeight = 1;
+	std::unordered_map<ChunkPos, Chunk*, ChunkPosHash> chunks;
+	std::unordered_map<ChunkPos, ChunkData*, ChunkPosHash> chunkData;
+	std::queue<ChunkPos> chunkQueue;
+	std::queue<ChunkPos> chunkDataQueue;
+	std::queue<ChunkPos> chunkDataDeleteQueue;
 	unsigned int chunksLoading = 0;
 	int lastCamX = -100, lastCamY = -100, lastCamZ = -100;
+	int camChunkX = -100, camChunkY = -100, camChunkZ = -100;
 
 	Shader* solidShader;
 	Shader* waterShader;
 	Shader* billboardShader;
+
+	std::thread chunkThread;
+	std::mutex chunkMutex;
+
+	bool shouldEnd = false;
 };

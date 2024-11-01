@@ -5,9 +5,12 @@
 #include <OpenSimplexNoise.hh>
 
 #include "Blocks.h"
+#include "Planet.h"
 
-void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSize, std::vector<unsigned int>* chunkData)
+void WorldGen::GenerateChunkData(ChunkPos chunkPos, uint16_t* chunkData)
 {
+	static int chunkSize = CHUNK_SIZE;
+
 	// Init noise
 	static OSN::Noise<2> noise2D;
 	static OSN::Noise<3> noise3D;
@@ -15,7 +18,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 	// Init noise settings
 	static NoiseSettings surfaceSettings[]{
 		{ 0.01f, 20.0f, 0 },
-		{ 0.05f,   3.0f, 0 }
+		{ 0.05f,  3.0f, 0 }
 	};
 	static int surfaceSettingsLength = sizeof(surfaceSettings) / sizeof(*surfaceSettings);
 
@@ -284,14 +287,12 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 
 	static int waterLevel = 20;
 
-	// Set vector size
-	chunkData->reserve(chunkSize * chunkSize * chunkSize);
-
 	// Account for chunk position
-	int startX = chunkX * chunkSize;
-	int startY = chunkY * chunkSize;
-	int startZ = chunkZ * chunkSize;
+	int startX = chunkPos.x * chunkSize;
+	int startY = chunkPos.y * chunkSize;
+	int startZ = chunkPos.z * chunkSize;
 
+	int currentIndex = 0;
 	for (int x = 0; x < chunkSize; x++)
 	{
 		for (int z = 0; z < chunkSize; z++)
@@ -334,12 +335,12 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 				if (y + startY > noiseY)
 				{
 					if (y + startY <= waterLevel)
-						chunkData->push_back(Blocks::WATER);
+						chunkData[currentIndex] = Blocks::WATER;
 					else
-						chunkData->push_back(Blocks::AIR);
+						chunkData[currentIndex] = Blocks::AIR;
 				}
 				else if (cave)
-					chunkData->push_back(Blocks::AIR);
+					chunkData[currentIndex] = Blocks::AIR;
 				// Ground
 				else
 				{
@@ -357,7 +358,7 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 
 						if (noiseOre > oreSettings[i].chance)
 						{
-							chunkData->push_back(oreSettings[i].block);
+							chunkData[currentIndex] = oreSettings[i].block;
 							blockSet = true;
 							break;
 						}
@@ -366,13 +367,21 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 					if (!blockSet)
 					{
 						if (y + startY == noiseY)
-							chunkData->push_back(Blocks::GRASS_BLOCK);
+							if (noiseY > waterLevel + 1)
+								chunkData[currentIndex] = Blocks::GRASS_BLOCK;
+							else
+								chunkData[currentIndex] = Blocks::SAND;
 						else if (y + startY > 10)
-							chunkData->push_back(Blocks::DIRT_BLOCK);
+							if (noiseY > waterLevel + 1)
+								chunkData[currentIndex] = Blocks::DIRT_BLOCK;
+							else
+								chunkData[currentIndex] = Blocks::SAND;
 						else
-							chunkData->push_back(Blocks::STONE_BLOCK);
+							chunkData[currentIndex] = Blocks::STONE_BLOCK;
 					}
 				}
+
+				currentIndex++;
 			}
 		}
 	}
@@ -393,11 +402,11 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 						* surfaceSettings[s].amplitude;
 				}
 
-				if (noiseY + surfaceFeatures[i].offsetY > startY + 32 || noiseY + surfaceFeatures[i].sizeY + surfaceFeatures[i].offsetY < startY)
+				if (noiseY + surfaceFeatures[i].offsetY > startY + chunkSize || noiseY + surfaceFeatures[i].sizeY + surfaceFeatures[i].offsetY < startY)
 					continue;
 
-				// Check if it's in water
-				if (noiseY < waterLevel)
+				// Check if it's in water or on sand
+				if (noiseY < waterLevel + 2)
 					continue;
 				
 				// Check if it's in a cave
@@ -446,11 +455,11 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 								int localZ = featureZ + fZ + surfaceFeatures[i].offsetZ - startZ;
 								//std::cout << "FeatureZ: " << featureZ << ", fZ: " << fZ << ", startZ: " << startZ << ", localZ: " << localZ << '\n';
 
-								if (localX >= 32 || localX < 0)
+								if (localX >= chunkSize || localX < 0)
 									continue;
-								if (localY >= 32 || localY < 0)
+								if (localY >= chunkSize || localY < 0)
 									continue;
-								if (localZ >= 32 || localZ < 0)
+								if (localZ >= chunkSize || localZ < 0)
 									continue;
 								
 								int featureIndex = fY * surfaceFeatures[i].sizeX * surfaceFeatures[i].sizeZ + 
@@ -460,8 +469,8 @@ void WorldGen::GenerateChunkData(int chunkX, int chunkY, int chunkZ, int chunkSi
 								int localIndex = localX * chunkSize * chunkSize + localZ * chunkSize + localY;
 								//std::cout << "Local Index: " << localIndex << ", Max Index: " << chunkData->size() << '\n';
 
-								if (surfaceFeatures[i].replaceBlock[featureIndex] || chunkData->at(localIndex) == 0)
-									chunkData->at(localIndex) = surfaceFeatures[i].blocks[featureIndex];
+								if (surfaceFeatures[i].replaceBlock[featureIndex] || chunkData[localIndex] == 0)
+									chunkData[localIndex] = surfaceFeatures[i].blocks[featureIndex];
 							}
 						}
 					}

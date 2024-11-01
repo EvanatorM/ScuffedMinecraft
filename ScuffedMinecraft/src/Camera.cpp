@@ -38,9 +38,9 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
     if (direction == RIGHT)
         Position += Right * velocity;
     if (direction == UP)
-        Position.y += 1 * velocity;
+        Position += (absoluteVerticalMovement ? glm::vec3(0, 1, 0) : Up) * velocity;
     if (direction == DOWN)
-        Position.y -= 1 * velocity;
+        Position -= (absoluteVerticalMovement ? glm::vec3(0, 1, 0) : Up) * velocity;
     if (direction == FORWARD_NO_Y)
     {
         glm::vec3 moveDir = Front;

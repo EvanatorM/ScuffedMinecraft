@@ -24,11 +24,13 @@
 #include "Camera.h"
 #include "Planet.h"
 #include "Blocks.h"
+#include "Physics.h"
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -42,17 +44,21 @@ bool firstMouse = true;
 
 bool menuMode = false;
 bool escapeDown = false;
+bool f1Down = false;
 
+// Window settings
 float windowX = 1920;
 float windowY = 1080;
+bool vsync = true;
+
+uint16_t selectedBlock = 1;
+
+bool uiEnabled = true;
 
 Camera camera;
 
 GLuint framebufferTexture;
 GLuint depthTexture;
-
-// Window options
-#define VSYNC 1 // 0 for off, 1 for on
 
 float rectangleVertices[] =
 {
@@ -66,39 +72,66 @@ float rectangleVertices[] =
 	-1.0f,  1.0f,  0.0f, 1.0f
 };
 
-int main (int argc, char *argv[]) {
+float outlineVertices[] = 
+{
+	-.001f, -.001f, -.001f,  1.001f, -.001f, -.001f,
+    1.001f, -.001f, -.001f,  1.001f, 1.001f, -.001f,
+	1.001f, 1.001f, -.001f,  -.001f, 1.001f, -.001f,
+	-.001f, 1.001f, -.001f,  -.001f, -.001f, -.001f,
+	   		   		   							
+	-.001f, -.001f, -.001f,  -.001f, -.001f, 1.001f,
+	-.001f, -.001f, 1.001f,  -.001f, 1.001f, 1.001f,
+	-.001f, 1.001f, 1.001f,  -.001f, 1.001f, -.001f,
+	   		   		   							
+	1.001f, -.001f, -.001f,  1.001f, -.001f, 1.001f,
+	1.001f, -.001f, 1.001f,  1.001f, 1.001f, 1.001f,
+	1.001f, 1.001f, 1.001f,  1.001f, 1.001f, -.001f,
+	   		   		   							
+	-.001f, -.001f, 1.001f,  1.001f, -.001f, 1.001f,
+	-.001f, 1.001f, 1.001f,  1.001f, 1.001f, 1.001f,
+};
+
+float crosshairVertices[] =
+{
+	windowX / 2 - 13.5, windowY / 2 - 13.5,  0.0f, 0.0f,
+	windowX / 2 + 13.5, windowY / 2 - 13.5,  1.0f, 0.0f,
+	windowX / 2 + 13.5, windowY / 2 + 13.5,  1.0f, 1.0f,
+				  					 
+	windowX / 2 - 13.5, windowY / 2 - 13.5,  0.0f, 0.0f,
+	windowX / 2 - 13.5, windowY / 2 + 13.5,  0.0f, 1.0f,
+	windowX / 2 + 13.5, windowY / 2 + 13.5,  1.0f, 1.0f,
+};
+
+int main(int argc, char *argv[])
+{
 #ifdef LINUX
-  char* resolved_path = realpath(argv[0],NULL);
-  if (resolved_path == NULL) {
-    printf("%s: Please do not place binary in PATH\n", argv[0]);
-    exit(1);
-  }
-  size_t resolved_length = strlen(resolved_path);
+	char* resolved_path = realpath(argv[0], NULL);
+	if (resolved_path == NULL) {
+		printf("%s: Please do not place binary in PATH\n", argv[0]);
+		exit(1);
+	}
+	size_t resolved_length = strlen(resolved_path);
+	// remove executable from path
+	for (size_t i = resolved_length; i > 0; i--) {
+		if (resolved_path[i] == '/' && resolved_path[i + 1] != 0) {
+			resolved_path[i + 1] = 0;
+			resolved_length = i;
+			break;
+		}
+	}
+	char* assets_path = (char*)malloc(resolved_length + strlen("assets") + 2);
+	strcpy(assets_path, resolved_path);
+	strcpy(assets_path + resolved_length + 1, "assets");
+	struct stat path_stat;
+	if (stat(assets_path, &path_stat) == -1 || !S_ISDIR(path_stat.st_mode)) {
+		printf("%s: Asset directory not found\n", argv[0]);
+		exit(1);
+	}
+	free(assets_path);
 
-  // remove executable from path
-  for (size_t i = resolved_length; i > 0; i--) {
-    if (resolved_path[i] == '/' && resolved_path[i+1] != 0) {
-      resolved_path[i+1] = 0;
-      resolved_length = i;
-      break;
-    }  
-  }
-
-  char* assets_path = (char *)malloc(resolved_length + strlen("assets") + 2);
-  strcpy(assets_path, resolved_path);
-  strcpy(assets_path + resolved_length + 1, "assets");
-  struct stat path_stat;
-  if(stat(assets_path, &path_stat) == -1 || !S_ISDIR(path_stat.st_mode)) {
-    printf("%s: Asset directory not found\n", argv[0]);
-    exit(1);
-  }
-
-  free(assets_path);
-  
-  chdir(resolved_path);
-  free(resolved_path);
+	chdir(resolved_path);
+	free(resolved_path);
 #endif
-
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -114,7 +147,7 @@ int main (int argc, char *argv[]) {
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(VSYNC);
+	glfwSwapInterval(vsync ? 1 : 0);
 
 	// Initialize GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -128,6 +161,7 @@ int main (int argc, char *argv[]) {
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
 
@@ -155,6 +189,10 @@ int main (int argc, char *argv[]) {
 	billboardShader.setFloat("texMultiplier", 0.0625f);
 
 	Shader framebufferShader("assets/shaders/framebuffer_vert.glsl", "assets/shaders/framebuffer_frag.glsl");
+
+	Shader outlineShader("assets/shaders/block_outline_vert.glsl", "assets/shaders/block_outline_frag.glsl");
+
+	Shader crosshairShader("assets/shaders/crosshair_vert.glsl", "assets/shaders/crosshair_frag.glsl");
 
 	// Create post-processing framebuffer
 	unsigned int FBO;
@@ -198,6 +236,26 @@ int main (int argc, char *argv[]) {
 	glUniform1i(glGetUniformLocation(framebufferShader.ID, "screenTexture"), 0);
 	glUniform1i(glGetUniformLocation(framebufferShader.ID, "depthTexture"), 1);
 
+	unsigned int outlineVAO, outlineVBO;
+	glGenVertexArrays(1, &outlineVAO);
+	glGenBuffers(1, &outlineVBO);
+	glBindVertexArray(outlineVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, outlineVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(outlineVertices), &outlineVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	unsigned int crosshairVAO, crosshairVBO;
+	glGenVertexArrays(1, &crosshairVAO);
+	glGenBuffers(1, &crosshairVBO);
+	glBindVertexArray(crosshairVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, crosshairVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), &crosshairVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Create terrain texture
@@ -227,12 +285,38 @@ int main (int argc, char *argv[]) {
 
 	stbi_image_free(data);
 
+	// Create crosshair texture
+	unsigned int crosshairTexture;
+	glGenTextures(1, &crosshairTexture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, crosshairTexture);
+
+	// Set texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	// Load Crosshair Texture
+	unsigned char* data2 = stbi_load("assets/sprites/crosshair.png", &width, &height, &nrChannels, 0);
+	if (data2)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture\n";
+	}
+
+	stbi_image_free(data2);
+
 	// Create camera
 	camera = Camera(glm::vec3(0.0f, 25.0f, 0.0f));
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Planet::planet = new Planet(&shader, &waterShader, &billboardShader);
+
+	glm::mat4 ortho = glm::ortho(0.0f, (float)windowX, (float)windowY, 0.0f, 0.0f, 10.0f);
 
 	// Initialize ImGui
 	IMGUI_CHECKVERSION();
@@ -270,6 +354,8 @@ int main (int argc, char *argv[]) {
 
 		waterShader.use();
 		waterShader.setFloat("time", currentFrame);
+		outlineShader.use();
+		outlineShader.setFloat("time", currentFrame);
 
 		// Input
 		processInput(window);
@@ -311,24 +397,60 @@ int main (int argc, char *argv[]) {
 		projectionLoc = glGetUniformLocation(billboardShader.ID, "projection");
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		Planet::planet->Update(camera.Position.x, camera.Position.y, camera.Position.z);
+		outlineShader.use();
+		viewLoc = glGetUniformLocation(outlineShader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		projectionLoc = glGetUniformLocation(outlineShader.ID, "projection");
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+		Planet::planet->Update(camera.Position);
+
+		// -- Render block outline -- //
+		if (uiEnabled)
+		{
+			// Get block position
+			auto result = Physics::Raycast(camera.Position, camera.Front, 5);
+			if (result.hit)
+			{
+				outlineShader.use();
+
+				// Set outline view to position
+				unsigned int modelLoc = glGetUniformLocation(outlineShader.ID, "model");
+				glUniform3f(modelLoc, result.blockX, result.blockY, result.blockZ);
+
+				// Render
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				//glEnable(GL_COLOR_LOGIC_OP);
+				glLogicOp(GL_INVERT);
+				glDisable(GL_CULL_FACE);
+				glBindVertexArray(outlineVAO);
+				glLineWidth(2.0);
+				glDrawArrays(GL_LINES, 0, 24);
+
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_CULL_FACE);
+				//glDisable(GL_COLOR_LOGIC_OP);
+			}
+		}
 
 		framebufferShader.use();
+
+		// -- Post Processing Stuff -- //
 
 		// Check if player is underwater
 		int blockX = camera.Position.x < 0 ? camera.Position.x - 1 : camera.Position.x;
 		int blockY = camera.Position.y < 0 ? camera.Position.y - 1 : camera.Position.y;
 		int blockZ = camera.Position.z < 0 ? camera.Position.z - 1 : camera.Position.z;
 
-		int chunkX = blockX < 0 ? floorf(blockX / (float)Planet::chunkSize) : blockX / (int)Planet::chunkSize;
-		int chunkY = blockY < 0 ? floorf(blockY / (float)Planet::chunkSize) : blockY / (int)Planet::chunkSize;
-		int chunkZ = blockZ < 0 ? floorf(blockZ / (float)Planet::chunkSize) : blockZ / (int)Planet::chunkSize;
+		int chunkX = blockX < 0 ? floorf(blockX / (float)CHUNK_SIZE) : blockX / (int)CHUNK_SIZE;
+		int chunkY = blockY < 0 ? floorf(blockY / (float)CHUNK_SIZE) : blockY / (int)CHUNK_SIZE;
+		int chunkZ = blockZ < 0 ? floorf(blockZ / (float)CHUNK_SIZE) : blockZ / (int)CHUNK_SIZE;
 
-		int localBlockX = blockX - (chunkX * Planet::chunkSize);
-		int localBlockY = blockY - (chunkY * Planet::chunkSize);
-		int localBlockZ = blockZ - (chunkZ * Planet::chunkSize);
+		int localBlockX = blockX - (chunkX * CHUNK_SIZE);
+		int localBlockY = blockY - (chunkY * CHUNK_SIZE);
+		int localBlockZ = blockZ - (chunkZ * CHUNK_SIZE);
 
-		Chunk* chunk = Planet::planet->GetChunk(chunkX, chunkY, chunkZ);
+		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
 		if (chunk != nullptr)
 		{
 			unsigned int blockType = chunk->GetBlockAtPos(
@@ -346,6 +468,7 @@ int main (int argc, char *argv[]) {
 			}
 		}
 
+		// Post Processing
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindVertexArray(rectVAO);
 		glDisable(GL_DEPTH_TEST);
@@ -355,15 +478,50 @@ int main (int argc, char *argv[]) {
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-		// Draw ImGui UI
-		ImGui::Begin("Test");
-		ImGui::Text("FPS: %f (Avg: %f, Min: %f, Max: %f)", fps, avgFps, lowestFps, highestFps);
-		ImGui::Text("MS: %f", deltaTime * 100.0f);
-		ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
-		ImGui::End();
+		if (uiEnabled)
+		{
+			// -- Render Crosshair -- //
 
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			// Render
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, crosshairTexture);
+
+			crosshairShader.use();
+			glDisable(GL_CULL_FACE);
+			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glEnable(GL_COLOR_LOGIC_OP);
+
+			unsigned int crosshairProjLoc = glGetUniformLocation(crosshairShader.ID, "projection");
+			glUniformMatrix4fv(crosshairProjLoc, 1, GL_FALSE, glm::value_ptr(ortho));
+			glBindVertexArray(crosshairVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			glEnable(GL_CULL_FACE);
+			glEnable(GL_DEPTH_TEST);
+			glDisable(GL_BLEND);
+			glDisable(GL_COLOR_LOGIC_OP);
+
+			// Draw ImGui UI
+			ImGui::Begin("Test");
+			ImGui::Text("FPS: %d (Avg: %d, Min: %d, Max: %d)", (int)fps, (int)avgFps, (int)lowestFps, (int)highestFps);
+			ImGui::Text("MS: %f", deltaTime * 100.0f);
+			if (ImGui::Checkbox("VSYNC", &vsync))
+				glfwSwapInterval(vsync ? 1 : 0);
+			ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
+			ImGui::Text("Position: x: %f, y: %f, z: %f", camera.Position.x, camera.Position.y, camera.Position.z);
+			ImGui::Text("Direction: x: %f, y: %f, z: %f", camera.Front.x, camera.Front.y, camera.Front.z);
+			ImGui::Text("Selected Block: %s", Blocks::blocks[selectedBlock].blockName);
+			if (ImGui::SliderInt("Render Distance", &Planet::planet->renderDistance, 0, 30))
+				Planet::planet->ClearChunkQueue();
+			if (ImGui::SliderInt("Render Height", &Planet::planet->renderHeight, 0, 10))
+				Planet::planet->ClearChunkQueue();
+			ImGui::Checkbox("Use absolute Y axis for camera vertical movement", &camera.absoluteVerticalMovement);
+			ImGui::End();
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
 
 		// Check and call events and swap buffers
 		glfwSwapBuffers(window);
@@ -371,6 +529,8 @@ int main (int argc, char *argv[]) {
 
 		//std::cout << camera.Position.x << ", " << camera.Position.y << ", " << camera.Position.z << '\n';
 	}
+
+	delete Planet::planet;
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
@@ -388,7 +548,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	// resize framebuffer texture
 	glBindTexture(GL_TEXTURE_2D, framebufferTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowX, windowY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
 	// resize framebuffer depth texture
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -396,6 +555,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window)
 {
+	// Pause
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		if (escapeDown)
@@ -409,6 +569,18 @@ void processInput(GLFWwindow* window)
 	}
 	else
 		escapeDown = false;
+
+	// UI Toggle
+	if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
+	{
+		if (f1Down)
+			return;
+
+		f1Down = true;
+		uiEnabled = !uiEnabled;
+	}
+	else
+		f1Down = false;
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
@@ -427,6 +599,61 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(UP, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		camera.ProcessKeyboard(DOWN, deltaTime);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		auto result = Physics::Raycast(camera.Position, camera.Front, 5);
+		if (!result.hit)
+			return;
+
+		result.chunk->UpdateBlock(result.localBlockX, result.localBlockY, result.localBlockZ, 0);
+	}
+	else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+	{
+		auto result = Physics::Raycast(camera.Position, camera.Front, 5);
+		if (!result.hit)
+			return;
+
+		selectedBlock = result.chunk->GetBlockAtPos(result.localBlockX, result.localBlockY, result.localBlockZ);
+	}
+	else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+	{
+		auto result = Physics::Raycast(camera.Position, camera.Front, 5);
+		if (!result.hit)
+			return;
+
+		float distX = result.hitPos.x - (result.blockX + .5f);
+		float distY = result.hitPos.y - (result.blockY + .5f);
+		float distZ = result.hitPos.z - (result.blockZ + .5f);
+
+		int blockX = result.blockX;
+		int blockY = result.blockY;
+		int blockZ = result.blockZ;
+		
+		// Choose face to place on
+		if (abs(distX) > abs(distY) && abs(distX) > abs(distZ))
+			blockX += (distX > 0 ? 1 : -1);
+		else if (abs(distY) > abs(distX) && abs(distY) > abs(distZ))
+			blockY += (distY > 0 ? 1 : -1);
+		else
+			blockZ += (distZ > 0 ? 1 : -1);
+
+		int chunkX = blockX < 0 ? floorf(blockX / (float)CHUNK_SIZE) : blockX / (int)CHUNK_SIZE;
+		int chunkY = blockY < 0 ? floorf(blockY / (float)CHUNK_SIZE) : blockY / (int)CHUNK_SIZE;
+		int chunkZ = blockZ < 0 ? floorf(blockZ / (float)CHUNK_SIZE) : blockZ / (int)CHUNK_SIZE;
+
+		int localBlockX = blockX - (chunkX * CHUNK_SIZE);
+		int localBlockY = blockY - (chunkY * CHUNK_SIZE);
+		int localBlockZ = blockZ - (chunkZ * CHUNK_SIZE);
+
+		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
+		uint16_t blockToReplace = chunk->GetBlockAtPos(localBlockX, localBlockY, localBlockZ);
+		if (chunk != nullptr && (blockToReplace == 0 || Blocks::blocks[blockToReplace].blockType == Block::LIQUID))
+			chunk->UpdateBlock(localBlockX, localBlockY, localBlockZ, selectedBlock);
+	}
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

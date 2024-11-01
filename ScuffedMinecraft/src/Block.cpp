@@ -1,7 +1,7 @@
 #include "Block.h"
 
-Block::Block(char minX, char minY, char maxX, char maxY, BLOCK_TYPE blockType)
-	: blockType(blockType)
+Block::Block(char minX, char minY, char maxX, char maxY, BLOCK_TYPE blockType, std::string blockName)
+	: blockType(blockType), blockName(blockName)
 {
 	topMinX = minX;
 	topMinY = minY;
@@ -21,8 +21,8 @@ Block::Block(char minX, char minY, char maxX, char maxY, BLOCK_TYPE blockType)
 
 Block::Block(char topMinX, char topMinY, char topMaxX, char topMaxY,
 	char bottomMinX, char bottomMinY, char bottomMaxX, char bottomMaxY,
-	char sideMinX, char sideMinY, char sideMaxX, char sideMaxY, BLOCK_TYPE blockType)
-	: blockType(blockType)
+	char sideMinX, char sideMinY, char sideMaxX, char sideMaxY, BLOCK_TYPE blockType, std::string blockName)
+	: blockType(blockType), blockName(blockName)
 {
 	this->topMinX = topMinX;
 	this->topMinY = topMinY;

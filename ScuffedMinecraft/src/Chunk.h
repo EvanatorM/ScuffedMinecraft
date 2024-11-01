@@ -6,31 +6,40 @@
 
 #include "Shader.h"
 #include "Vertex.h"
+#include "ChunkPos.h"
+#include "ChunkData.h"
 
 class Chunk
 {
 public:
-	Chunk(unsigned int chunkSize, glm::vec3 chunkPos, Shader* shader, Shader* waterShader);
+	Chunk(ChunkPos chunkPos, Shader* shader, Shader* waterShader);
 	~Chunk();
 
-	void GenerateChunk();
+	void GenerateChunkMesh();
 	void Render(Shader* mainShader, Shader* billboardShader);
 	void RenderWater(Shader* shader);
-	unsigned int GetBlockAtPos(int x, int y, int z);
+	uint16_t GetBlockAtPos(int x, int y, int z);
+	void UpdateBlock(int x, int y, int z, uint16_t newBlock);
+	void UpdateChunk();
 
 public:
-	std::vector<unsigned int> chunkData;
-	glm::vec3 chunkPos;
+	ChunkData* chunkData;
+	ChunkData* northData;
+	ChunkData* southData;
+	ChunkData* upData;
+	ChunkData* downData;
+	ChunkData* eastData;
+	ChunkData* westData;
+	ChunkPos chunkPos;
 	bool ready;
 	bool generated;
 
 private:
-	unsigned int chunkSize;
 	glm::vec3 worldPos;
 	std::thread chunkThread;
 
 	std::vector<Vertex> mainVertices;
-	std::vector<unsigned int> mianIndices;
+	std::vector<unsigned int> mainIndices;
 	std::vector<WaterVertex> waterVertices;
 	std::vector<unsigned int> waterIndices;
 	std::vector<BillboardVertex> billboardVertices;
