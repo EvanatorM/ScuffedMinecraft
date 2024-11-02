@@ -23,7 +23,7 @@ namespace Blocks
 
 		Block(0, 2, 1, 3, Block::LEAVES, "Leaves"),					// Leaves
 		Block(1, 2, 2, 3, Block::BILLBOARD, "Grass"),				// Grass
-		Block(3, 0, 4, 1, Block::BILLBOARD, "Tall Grass Bot"),		// Tall Grass Bottom
+		Block(3, 0, 4, 1, Block::BILLBOARD, "Tall Grass Bottom"),	// Tall Grass Bottom
 		Block(3, 1, 4, 2, Block::BILLBOARD, "Tall Grass Top"),		// Tall Grass Top
 		Block(0, 3, 1, 4, Block::BILLBOARD, "Poppy"),				// Poppy
 		Block(2, 2, 3, 3, Block::BILLBOARD, "White Tulip"),			// White Tulip
