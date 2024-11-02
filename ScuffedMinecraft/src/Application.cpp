@@ -511,7 +511,7 @@ int main(int argc, char *argv[])
 			ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
 			ImGui::Text("Position: x: %f, y: %f, z: %f", camera.Position.x, camera.Position.y, camera.Position.z);
 			ImGui::Text("Direction: x: %f, y: %f, z: %f", camera.Front.x, camera.Front.y, camera.Front.z);
-			ImGui::Text("Selected Block: %s", Blocks::blocks[selectedBlock].blockName);
+			ImGui::Text("Selected Block: %s", Blocks::blocks[selectedBlock].blockName.c_str());
 			if (ImGui::SliderInt("Render Distance", &Planet::planet->renderDistance, 0, 30))
 				Planet::planet->ClearChunkQueue();
 			if (ImGui::SliderInt("Render Height", &Planet::planet->renderHeight, 0, 10))
