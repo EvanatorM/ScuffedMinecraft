@@ -103,9 +103,11 @@ void Planet::ChunkThreadUpdate()
 				chunks.find({ pos.x, pos.y, pos.z - 1 }) == chunks.end())
 			{
 				delete chunkData.at(pos);
-				chunkData.erase(pos);
+				it = chunkData.erase(it);
 			}
-			++it;
+			else {
+				++it;
+			}
 		}
 
 		// Check if camera moved to new chunk
