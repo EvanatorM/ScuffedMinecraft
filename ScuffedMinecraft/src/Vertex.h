@@ -55,4 +55,9 @@ struct BillboardVertex
 		texGridX = _texGridX;
 		texGridY = _texGridY;
 	}
+
+	BillboardVertex(const BillboardVertex&) = default;
+	BillboardVertex(BillboardVertex&&) noexcept = default;
+
+	BillboardVertex& operator=(const BillboardVertex&) = default;
 };

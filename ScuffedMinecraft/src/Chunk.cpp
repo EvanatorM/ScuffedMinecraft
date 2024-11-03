@@ -79,31 +79,37 @@ void Chunk::GenerateChunkMesh()
 
 				if (block->blockType == Block::BILLBOARD)
 				{
-					billboardVertices.push_back(BillboardVertex(x + .85355f, y + 0, z + .85355f, block->sideMinX, block->sideMinY));
-					billboardVertices.push_back(BillboardVertex(x + .14645f, y + 0, z + .14645f, block->sideMaxX, block->sideMinY));
-					billboardVertices.push_back(BillboardVertex(x + .85355f, y + 1, z + .85355f, block->sideMinX, block->sideMaxY));
-					billboardVertices.push_back(BillboardVertex(x + .14645f, y + 1, z + .14645f, block->sideMaxX, block->sideMaxY));
+					// billboardVertices.push_back may reallocate memory and there were 8 different calls to that function
+					// Not only that increases the binary size, but that also increases the amount of memory reallocations
+					// the insert function reallocates the memory only onces and reduces the binary size significantly, as it's only 1 call
+					billboardVertices.insert(billboardVertices.end(), std::initializer_list<BillboardVertex>{
+						BillboardVertex(x + .85355f, y + 0, z + .85355f, block->sideMinX, block->sideMinY),
+						BillboardVertex(x + .14645f, y + 0, z + .14645f, block->sideMaxX, block->sideMinY),
+						BillboardVertex(x + .85355f, y + 1, z + .85355f, block->sideMinX, block->sideMaxY),
+						BillboardVertex(x + .14645f, y + 1, z + .14645f, block->sideMaxX, block->sideMaxY),
+						BillboardVertex(x + .14645f, y + 0, z + .85355f, block->sideMinX, block->sideMinY),
+						BillboardVertex(x + .85355f, y + 0, z + .14645f, block->sideMaxX, block->sideMinY),
+						BillboardVertex(x + .14645f, y + 1, z + .85355f, block->sideMinX, block->sideMaxY),
+						BillboardVertex(x + .85355f, y + 1, z + .14645f, block->sideMaxX, block->sideMaxY)
+					});
 
-					billboardIndices.push_back(currentBillboardVertex + 0);
-					billboardIndices.push_back(currentBillboardVertex + 3);
-					billboardIndices.push_back(currentBillboardVertex + 1);
-					billboardIndices.push_back(currentBillboardVertex + 0);
-					billboardIndices.push_back(currentBillboardVertex + 2);
-					billboardIndices.push_back(currentBillboardVertex + 3);
-					currentBillboardVertex += 4;
+					billboardIndices.insert(billboardIndices.end(), std::initializer_list<std::uint32_t>{
+						currentBillboardVertex + 0,
+						currentBillboardVertex + 3,
+						currentBillboardVertex + 1,
+						currentBillboardVertex + 0,
+						currentBillboardVertex + 2,
+						currentBillboardVertex + 3,
 
-					billboardVertices.push_back(BillboardVertex(x + .14645f, y + 0, z + .85355f, block->sideMinX, block->sideMinY));
-					billboardVertices.push_back(BillboardVertex(x + .85355f, y + 0, z + .14645f, block->sideMaxX, block->sideMinY));
-					billboardVertices.push_back(BillboardVertex(x + .14645f, y + 1, z + .85355f, block->sideMinX, block->sideMaxY));
-					billboardVertices.push_back(BillboardVertex(x + .85355f, y + 1, z + .14645f, block->sideMaxX, block->sideMaxY));
+						currentBillboardVertex + 4 + 0,
+						currentBillboardVertex + 4 + 3,
+						currentBillboardVertex + 4 + 1,
+						currentBillboardVertex + 4 + 0,
+						currentBillboardVertex + 4 + 2,
+						currentBillboardVertex + 4 + 3
+					});
 
-					billboardIndices.push_back(currentBillboardVertex + 0);
-					billboardIndices.push_back(currentBillboardVertex + 3);
-					billboardIndices.push_back(currentBillboardVertex + 1);
-					billboardIndices.push_back(currentBillboardVertex + 0);
-					billboardIndices.push_back(currentBillboardVertex + 2);
-					billboardIndices.push_back(currentBillboardVertex + 3);
-					currentBillboardVertex += 4;
+					currentBillboardVertex += 8;
 				}
 				else
 				{
@@ -128,32 +134,42 @@ void Chunk::GenerateChunkMesh()
 						{
 							if (block->blockType == Block::LIQUID)
 							{
-								waterVertices.push_back(WaterVertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0, 0));
-								waterVertices.push_back(WaterVertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0, 0));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0, waterTopValue));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0, waterTopValue));
+								waterVertices.insert(waterVertices.end(), std::initializer_list<WaterVertex>{
+									WaterVertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0, 0),
+									WaterVertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0, 0),
+									WaterVertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0, waterTopValue),
+									WaterVertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0, waterTopValue)
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
+								waterIndices.insert(waterIndices.end(), std::initializer_list<std::uint32_t>{
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 3,
+									currentLiquidVertex + 1,
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 2,
+									currentLiquidVertex + 3
+								});
+
 								currentLiquidVertex += 4;
 							}
 							else
 							{
-								mainVertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0));
-								mainVertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0));
-								mainVertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0));
-								mainVertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0));
+								mainVertices.insert(mainVertices.end(), std::initializer_list<Vertex>{
+									Vertex(x + 1, y + 0, z + 0, block->sideMinX, block->sideMinY, 0),
+									Vertex(x + 0, y + 0, z + 0, block->sideMaxX, block->sideMinY, 0),
+									Vertex(x + 1, y + 1, z + 0, block->sideMinX, block->sideMaxY, 0),
+									Vertex(x + 0, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 0)
+								});
 
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 3);
-								mainIndices.push_back(currentVertex + 1);
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 2);
-								mainIndices.push_back(currentVertex + 3);
+								mainIndices.insert(mainIndices.end(), std::initializer_list<std::uint32_t>{
+									currentVertex + 0,
+									currentVertex + 3,
+									currentVertex + 1,
+									currentVertex + 0,
+									currentVertex + 2,
+									currentVertex + 3
+								});
+
 								currentVertex += 4;
 							}
 						}
@@ -180,32 +196,42 @@ void Chunk::GenerateChunkMesh()
 						{
 							if (block->blockType == Block::LIQUID)
 							{
-								waterVertices.push_back(WaterVertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1, 0));
-								waterVertices.push_back(WaterVertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1, 0));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1, waterTopValue));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1, waterTopValue));
+								waterVertices.insert(waterVertices.end(), std::initializer_list<WaterVertex>{
+									WaterVertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1, 0),
+									WaterVertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1, 0),
+									WaterVertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1, waterTopValue),
+									WaterVertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1, waterTopValue)
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
+								waterIndices.insert(waterIndices.end(), std::initializer_list<std::uint32_t>{
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 3,
+									currentLiquidVertex + 1,
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 2,
+									currentLiquidVertex + 3
+								});
+
 								currentLiquidVertex += 4;
 							}
 							else
 							{
-								mainVertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1));
-								mainVertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1));
-								mainVertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1));
-								mainVertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1));
+								mainVertices.insert(mainVertices.end(), std::initializer_list<Vertex>{
+									Vertex(x + 0, y + 0, z + 1, block->sideMinX, block->sideMinY, 1),
+									Vertex(x + 1, y + 0, z + 1, block->sideMaxX, block->sideMinY, 1),
+									Vertex(x + 0, y + 1, z + 1, block->sideMinX, block->sideMaxY, 1),
+									Vertex(x + 1, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 1)
+								});
 
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 3);
-								mainIndices.push_back(currentVertex + 1);
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 2);
-								mainIndices.push_back(currentVertex + 3);
+								mainIndices.insert(mainIndices.end(), std::initializer_list<std::uint32_t>{
+									currentVertex + 0,
+									currentVertex + 3,
+									currentVertex + 1,
+									currentVertex + 0,
+									currentVertex + 2,
+									currentVertex + 3
+								});
+
 								currentVertex += 4;
 							}
 						}
@@ -232,32 +258,42 @@ void Chunk::GenerateChunkMesh()
 						{
 							if (block->blockType == Block::LIQUID)
 							{
-								waterVertices.push_back(WaterVertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2, 0));
-								waterVertices.push_back(WaterVertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2, 0));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2, waterTopValue));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2, waterTopValue));
+								waterVertices.insert(waterVertices.end(), std::initializer_list<WaterVertex>{
+									WaterVertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2, 0),
+									WaterVertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2, 0),
+									WaterVertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2, waterTopValue),
+									WaterVertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2, waterTopValue)
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
+								waterIndices.insert(waterIndices.end(), std::initializer_list<std::uint32_t>{
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 3,
+									currentLiquidVertex + 1,
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 2,
+									currentLiquidVertex + 3
+								});
+
 								currentLiquidVertex += 4;
 							}
 							else
 							{
-								mainVertices.push_back(Vertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2));
-								mainVertices.push_back(Vertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2));
-								mainVertices.push_back(Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2));
-								mainVertices.push_back(Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2));
+								mainVertices.insert(mainVertices.end(), std::initializer_list<Vertex>{
+									Vertex(x + 0, y + 0, z + 0, block->sideMinX, block->sideMinY, 2),
+									Vertex(x + 0, y + 0, z + 1, block->sideMaxX, block->sideMinY, 2),
+									Vertex(x + 0, y + 1, z + 0, block->sideMinX, block->sideMaxY, 2),
+									Vertex(x + 0, y + 1, z + 1, block->sideMaxX, block->sideMaxY, 2)
+								});
 
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 3);
-								mainIndices.push_back(currentVertex + 1);
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 2);
-								mainIndices.push_back(currentVertex + 3);
+								mainIndices.insert(mainIndices.end(), std::initializer_list<std::uint32_t>{
+									currentVertex + 0,
+									currentVertex + 3,
+									currentVertex + 1,
+									currentVertex + 0,
+									currentVertex + 2,
+									currentVertex + 3
+								});
+
 								currentVertex += 4;
 							}
 						}
@@ -284,32 +320,42 @@ void Chunk::GenerateChunkMesh()
 						{
 							if (block->blockType == Block::LIQUID)
 							{
-								waterVertices.push_back(WaterVertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3, 0));
-								waterVertices.push_back(WaterVertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3, 0));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3, waterTopValue));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3, waterTopValue));
+								waterVertices.insert(waterVertices.end(), std::initializer_list<WaterVertex>{
+									WaterVertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3, 0),
+									WaterVertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3, 0),
+									WaterVertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3, waterTopValue),
+									WaterVertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3, waterTopValue)
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
+								waterIndices.insert(waterIndices.end(), std::initializer_list<std::uint32_t>{
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 3,
+									currentLiquidVertex + 1,
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 2,
+									currentLiquidVertex + 3
+								});
+
 								currentLiquidVertex += 4;
 							}
 							else
 							{
-								mainVertices.push_back(Vertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3));
-								mainVertices.push_back(Vertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3));
-								mainVertices.push_back(Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3));
-								mainVertices.push_back(Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3));
+								mainVertices.insert(mainVertices.end(), std::initializer_list<Vertex>{
+									Vertex(x + 1, y + 0, z + 1, block->sideMinX, block->sideMinY, 3),
+									Vertex(x + 1, y + 0, z + 0, block->sideMaxX, block->sideMinY, 3),
+									Vertex(x + 1, y + 1, z + 1, block->sideMinX, block->sideMaxY, 3),
+									Vertex(x + 1, y + 1, z + 0, block->sideMaxX, block->sideMaxY, 3)
+								});
 
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 3);
-								mainIndices.push_back(currentVertex + 1);
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 2);
-								mainIndices.push_back(currentVertex + 3);
+								mainIndices.insert(mainIndices.end(), std::initializer_list<std::uint32_t>{
+									currentVertex + 0,
+									currentVertex + 3,
+									currentVertex + 1,
+									currentVertex + 0,
+									currentVertex + 2,
+									currentVertex + 3
+								});
+
 								currentVertex += 4;
 							}
 						}
@@ -337,32 +383,42 @@ void Chunk::GenerateChunkMesh()
 						{
 							if (block->blockType == Block::LIQUID)
 							{
-								waterVertices.push_back(WaterVertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4, 0));
-								waterVertices.push_back(WaterVertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4, 0));
-								waterVertices.push_back(WaterVertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4, 0));
-								waterVertices.push_back(WaterVertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4, 0));
+								waterVertices.insert(waterVertices.end(), std::initializer_list<WaterVertex>{
+									WaterVertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4, 0),
+									WaterVertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4, 0),
+									WaterVertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4, 0),
+									WaterVertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4, 0)
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
+								waterIndices.insert(waterIndices.end(), std::initializer_list<std::uint32_t>{
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 3,
+									currentLiquidVertex + 1,
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 2,
+									currentLiquidVertex + 3
+								});
+
 								currentLiquidVertex += 4;
 							}
 							else
 							{
-								mainVertices.push_back(Vertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4));
-								mainVertices.push_back(Vertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4));
-								mainVertices.push_back(Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4));
-								mainVertices.push_back(Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4));
+								mainVertices.insert(mainVertices.end(), std::initializer_list<Vertex>{
+									Vertex(x + 1, y + 0, z + 1, block->bottomMinX, block->bottomMinY, 4),
+									Vertex(x + 0, y + 0, z + 1, block->bottomMaxX, block->bottomMinY, 4),
+									Vertex(x + 1, y + 0, z + 0, block->bottomMinX, block->bottomMaxY, 4),
+									Vertex(x + 0, y + 0, z + 0, block->bottomMaxX, block->bottomMaxY, 4)
+								});
 
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 3);
-								mainIndices.push_back(currentVertex + 1);
-								mainIndices.push_back(currentVertex + 0);
-								mainIndices.push_back(currentVertex + 2);
-								mainIndices.push_back(currentVertex + 3);
+								mainIndices.insert(mainIndices.end(), std::initializer_list<std::uint32_t>{
+									currentVertex + 0,
+									currentVertex + 3,
+									currentVertex + 1,
+									currentVertex + 0,
+									currentVertex + 2,
+									currentVertex + 3
+								});
+
 								currentVertex += 4;
 							}
 						}
@@ -374,31 +430,34 @@ void Chunk::GenerateChunkMesh()
 						{
 							if (topBlockType->blockType != Block::LIQUID)
 							{
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5, 1));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5, 1));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5, 1));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5, 1));
+								waterVertices.insert(waterVertices.end(), std::initializer_list<WaterVertex>{
+									WaterVertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5, 1),
+									WaterVertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5, 1),
+									WaterVertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5, 1),
+									WaterVertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5, 1),
+									WaterVertex(x + 1, y + 1, z + 1, block->topMinX, block->topMinY, 5, 1),
+									WaterVertex(x + 0, y + 1, z + 1, block->topMaxX, block->topMinY, 5, 1),
+									WaterVertex(x + 1, y + 1, z + 0, block->topMinX, block->topMaxY, 5, 1),
+									WaterVertex(x + 0, y + 1, z + 0, block->topMaxX, block->topMaxY, 5, 1)
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								currentLiquidVertex += 4;
+								waterIndices.insert(waterIndices.end(), std::initializer_list<std::uint32_t>{
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 3,
+									currentLiquidVertex + 1,
+									currentLiquidVertex + 0,
+									currentLiquidVertex + 2,
+									currentLiquidVertex + 3,
 
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 1, block->topMinX, block->topMinY, 5, 1));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 1, block->topMaxX, block->topMinY, 5, 1));
-								waterVertices.push_back(WaterVertex(x + 1, y + 1, z + 0, block->topMinX, block->topMaxY, 5, 1));
-								waterVertices.push_back(WaterVertex(x + 0, y + 1, z + 0, block->topMaxX, block->topMaxY, 5, 1));
+									currentLiquidVertex + 4 + 0,
+									currentLiquidVertex + 4 + 3,
+									currentLiquidVertex + 4 + 1,
+									currentLiquidVertex + 4 + 0,
+									currentLiquidVertex + 4 + 2,
+									currentLiquidVertex + 4 + 3
+								});
 
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								waterIndices.push_back(currentLiquidVertex + 1);
-								waterIndices.push_back(currentLiquidVertex + 0);
-								waterIndices.push_back(currentLiquidVertex + 2);
-								waterIndices.push_back(currentLiquidVertex + 3);
-								currentLiquidVertex += 4;
+								currentLiquidVertex += 8;
 							}
 						}
 						else if (topBlockType->blockType == Block::LEAVES
@@ -406,17 +465,22 @@ void Chunk::GenerateChunkMesh()
 							|| topBlockType->blockType == Block::BILLBOARD
 							|| topBlockType->blockType == Block::LIQUID)
 						{
-							mainVertices.push_back(Vertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5));
-							mainVertices.push_back(Vertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5));
-							mainVertices.push_back(Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5));
-							mainVertices.push_back(Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5));
+							mainVertices.insert(mainVertices.end(), std::initializer_list<Vertex>{
+								Vertex(x + 0, y + 1, z + 1, block->topMinX, block->topMinY, 5),
+								Vertex(x + 1, y + 1, z + 1, block->topMaxX, block->topMinY, 5),
+								Vertex(x + 0, y + 1, z + 0, block->topMinX, block->topMaxY, 5),
+								Vertex(x + 1, y + 1, z + 0, block->topMaxX, block->topMaxY, 5)
+							});
 
-							mainIndices.push_back(currentVertex + 0);
-							mainIndices.push_back(currentVertex + 3);
-							mainIndices.push_back(currentVertex + 1);
-							mainIndices.push_back(currentVertex + 0);
-							mainIndices.push_back(currentVertex + 2);
-							mainIndices.push_back(currentVertex + 3);
+							mainIndices.insert(mainIndices.end(), std::initializer_list<std::uint32_t>{
+								currentVertex + 0,
+								currentVertex + 3,
+								currentVertex + 1,
+								currentVertex + 0,
+								currentVertex + 2,
+								currentVertex + 3
+							});
+
 							currentVertex += 4;
 						}
 					}
