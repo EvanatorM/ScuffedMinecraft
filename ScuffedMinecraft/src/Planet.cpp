@@ -106,8 +106,10 @@ void Planet::ChunkThreadUpdate()
 				chunks.find({ pos.x, pos.y, pos.z + 1 }) == chunks.end() &&
 				chunks.find({ pos.x, pos.y, pos.z - 1 }) == chunks.end())
 			{
+				chunkMutex.lock();
 				delete it->second;
 				it = chunkData.erase( it );
+				chunkMutex.unlock();
 			}
 			else
 			{
