@@ -519,18 +519,15 @@ void Chunk::Render(Shader* mainShader, Shader* billboardShader)
 
 	// Render main mesh
 	mainShader->use();
+	mainShader->setMat4x4f( "model", model );
 
-	modelLoc = glGetUniformLocation(mainShader->ID, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 	glBindVertexArray(mainVAO);
 	glDrawElements(GL_TRIANGLES, numTrianglesMain, GL_UNSIGNED_INT, 0);
 
 	// Render billboard mesh
 	billboardShader->use();
-
-	modelLoc = glGetUniformLocation(billboardShader->ID, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	billboardShader->setMat4x4f( "model", model );
 
 	glDisable(GL_CULL_FACE);
 	glBindVertexArray(billboardVAO);
@@ -546,13 +543,12 @@ void Chunk::RenderWater(Shader* shader)
 	//std::cout << "Rendering chunk " << chunkPos.x << ", " << chunkPos.y << ", " << chunkPos.z << '\n'
 	//	<< "Chunk VAO: " << vertexArrayObject << '\n' << "Triangles: " << numTriangles << '\n';
 
-	modelLoc = glGetUniformLocation(shader->ID, "model");
 	glBindVertexArray(waterVAO);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, worldPos);
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
+	shader->setMat4x4f( "model", model );
+	
 	glDrawElements(GL_TRIANGLES, numTrianglesWater, GL_UNSIGNED_INT, 0);
 }
 

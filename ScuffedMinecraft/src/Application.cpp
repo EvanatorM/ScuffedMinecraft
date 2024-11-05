@@ -380,28 +380,20 @@ int main(int argc, char *argv[])
 		projection = glm::perspective(glm::radians(camera.Zoom), windowX / windowY, 0.1f, 1000.0f);
 
 		shader.use();
-		unsigned int viewLoc = glGetUniformLocation(shader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		unsigned int projectionLoc = glGetUniformLocation(shader.ID, "projection");
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		shader.setMat4x4f( "view", view );
+		shader.setMat4x4f( "projection", projection );
 
 		waterShader.use();
-		viewLoc = glGetUniformLocation(waterShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		projectionLoc = glGetUniformLocation(waterShader.ID, "projection");
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		waterShader.setMat4x4f( "view", view );
+		waterShader.setMat4x4f( "projection", projection );
 
 		billboardShader.use();
-		viewLoc = glGetUniformLocation(billboardShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		projectionLoc = glGetUniformLocation(billboardShader.ID, "projection");
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		billboardShader.setMat4x4f( "view", view );
+		billboardShader.setMat4x4f( "projection", projection );
 
 		outlineShader.use();
-		viewLoc = glGetUniformLocation(outlineShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		projectionLoc = glGetUniformLocation(outlineShader.ID, "projection");
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		outlineShader.setMat4x4f( "view", view );
+		outlineShader.setMat4x4f( "projection", projection );
 
 		Planet::planet->Update(camera.Position);
 
@@ -492,8 +484,7 @@ int main(int argc, char *argv[])
 			glEnable(GL_BLEND);
 			glEnable(GL_COLOR_LOGIC_OP);
 
-			unsigned int crosshairProjLoc = glGetUniformLocation(crosshairShader.ID, "projection");
-			glUniformMatrix4fv(crosshairProjLoc, 1, GL_FALSE, glm::value_ptr(ortho));
+			crosshairShader.setMat4x4f( "projection", ortho );
 			glBindVertexArray(crosshairVAO);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 
