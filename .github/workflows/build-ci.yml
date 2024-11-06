@@ -1,0 +1,102 @@
+on:
+  push:
+#     branches:
+#       - main
+
+# 1. Checkout repo
+# 2. mkdir build
+# 3. cd build
+# 4. cmake ../ScuffedMinecraft
+# 5. cmake --build .
+# zip ScuffedMinecraft/bin/* and upload it as an artifact
+
+jobs:
+  build-linux:
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            # compiler: [gcc, clang]
+            compiler: [gcc] # Disable clang for now as it does not compile (yet ;) )
+        fail-fast: false
+    runs-on: ${{ matrix.os }}
+    name: Build on ${{ matrix.os }} with ${{ matrix.compiler }}
+    steps:
+        - uses: actions/checkout@v4
+#
+#         - name: Update apt-get
+#           run: sudo apt-get update
+#
+#         - name: Install dependencies for GCC
+#           if: matrix.compiler == 'gcc'
+#           run: sudo apt-get install -y cmake gcc g++
+#
+#         - name: Install dependencies for Clang
+#           if: matrix.compiler == 'clang'
+#           run: sudo apt-get install -y cmake clang
+#
+#         - name: Install common dependencies
+#           # zip, opengl, etc.
+#           run: sudo apt-get install -y mesa-common-dev libglu1-mesa-dev
+        - name: Gather dependencies
+          # make a list and put them in GITHUB_ENV
+          run: |
+            DEPENDENCIES='cmake mesa-common-dev libglu1-mesa-dev libglfw3-dev'
+            if [ ${{ matrix.compiler }} == 'gcc' ]; then
+              DEPENDENCIES="$DEPENDENCIES gcc g++"
+            else
+              DEPENDENCIES="$DEPENDENCIES clang"
+            fi
+            
+            echo "DEPENDENCIES=$DEPENDENCIES" >> $GITHUB_ENV
+
+        - name: Install dependencies
+          run: |
+            sudo apt-get update -y
+            
+            echo "Installing $DEPENDENCIES"
+            
+            sudo apt-get install -y $DEPENDENCIES
+
+        - name: Build with gcc
+          if: matrix.compiler == 'gcc'
+          run: |
+            mkdir build
+            cd build
+            cmake ../ScuffedMinecraft -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+            cmake --build . --config Release -j $(nproc)
+
+        - name: Build with clang
+          if: matrix.compiler == 'clang'
+          run: |
+              mkdir build
+              cd build
+              cmake ../ScuffedMinecraft -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+              cmake --build . --config Release -j $(nproc)
+
+        - name: Upload artifact
+          uses: actions/upload-artifact@v4
+          with:
+              name: build-linux-${{ matrix.compiler }}
+              path: ScuffedMinecraft/bin/*
+
+  build-windows:
+    runs-on: windows-latest
+    name: Build on Windows
+    steps:
+        - uses: actions/checkout@v4
+
+        - name: Install dependencies
+          run: choco install cmake
+
+        - name: Build
+          run: |
+            mkdir build
+            cd build
+            cmake ../ScuffedMinecraft
+            cmake --build . -j $(nproc)
+
+        - name: Upload artifact
+          uses: actions/upload-artifact@v4
+          with:
+              name: build-windows
+              path: ScuffedMinecraft/bin/*
