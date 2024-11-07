@@ -8,5 +8,5 @@
 
 namespace WorldGen
 {
-	void GenerateChunkData(ChunkPos chunkPos, uint16_t* chunkData);
+	void GenerateChunkData(const glm::ivec3& chunkPos, uint16_t* chunkData);
 }

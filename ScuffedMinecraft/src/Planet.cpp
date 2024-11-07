@@ -92,7 +92,7 @@ void Planet::ChunkThreadUpdate()
 	{
 		for (auto it = chunkData.begin(); it != chunkData.end(); )
 		{
-			ChunkPos pos = it->first;
+			glm::ivec3 pos = it->first;
 
 			if (chunks.find(pos) == chunks.end() &&
 				chunks.find({ pos.x + 1, pos.y, pos.z }) == chunks.end() &&
@@ -200,7 +200,7 @@ void Planet::ChunkThreadUpdate()
 			chunkMutex.lock();
 			if (!chunkDataQueue.empty())
 			{
-				ChunkPos chunkPos = chunkDataQueue.front();
+				glm::ivec3 chunkPos = chunkDataQueue.front();
 
 				if (chunkData.find(chunkPos) != chunkData.end())
 				{
@@ -226,7 +226,7 @@ void Planet::ChunkThreadUpdate()
 				if (!chunkQueue.empty())
 				{
 					// Check if chunk exists
-					ChunkPos chunkPos = chunkQueue.front();
+					glm::ivec3 chunkPos = chunkQueue.front();
 					if (chunks.find(chunkPos) != chunks.end())
 					{
 						chunkQueue.pop();
@@ -266,7 +266,7 @@ void Planet::ChunkThreadUpdate()
 
 					// Set top data
 					{
-						ChunkPos topPos(chunkPos.x, chunkPos.y + 1, chunkPos.z);
+						glm::ivec3 topPos(chunkPos.x, chunkPos.y + 1, chunkPos.z);
 						chunkMutex.lock();
 						if (chunkData.find(topPos) == chunkData.end())
 						{
@@ -292,7 +292,7 @@ void Planet::ChunkThreadUpdate()
 
 					// Set bottom data
 					{
-						ChunkPos bottomPos(chunkPos.x, chunkPos.y - 1, chunkPos.z);
+						glm::ivec3 bottomPos(chunkPos.x, chunkPos.y - 1, chunkPos.z);
 						chunkMutex.lock();
 						if (chunkData.find(bottomPos) == chunkData.end())
 						{
@@ -318,7 +318,7 @@ void Planet::ChunkThreadUpdate()
 
 					// Set north data
 					{
-						ChunkPos northPos(chunkPos.x, chunkPos.y, chunkPos.z - 1);
+						glm::ivec3 northPos(chunkPos.x, chunkPos.y, chunkPos.z - 1);
 						chunkMutex.lock();
 						if (chunkData.find(northPos) == chunkData.end())
 						{
@@ -344,7 +344,7 @@ void Planet::ChunkThreadUpdate()
 
 					// Set south data
 					{
-						ChunkPos southPos(chunkPos.x, chunkPos.y, chunkPos.z + 1);
+						glm::ivec3 southPos(chunkPos.x, chunkPos.y, chunkPos.z + 1);
 						chunkMutex.lock();
 						if (chunkData.find(southPos) == chunkData.end())
 						{
@@ -370,7 +370,7 @@ void Planet::ChunkThreadUpdate()
 
 					// Set east data
 					{
-						ChunkPos eastPos(chunkPos.x + 1, chunkPos.y, chunkPos.z);
+						glm::ivec3 eastPos(chunkPos.x + 1, chunkPos.y, chunkPos.z);
 						chunkMutex.lock();
 						if (chunkData.find(eastPos) == chunkData.end())
 						{
@@ -396,7 +396,7 @@ void Planet::ChunkThreadUpdate()
 
 					// Set west data
 					{
-						ChunkPos westPos(chunkPos.x - 1, chunkPos.y, chunkPos.z);
+						glm::ivec3 westPos(chunkPos.x - 1, chunkPos.y, chunkPos.z);
 						chunkMutex.lock();
 						if (chunkData.find(westPos) == chunkData.end())
 						{
@@ -440,7 +440,7 @@ void Planet::ChunkThreadUpdate()
 	}
 }
 
-Chunk* Planet::GetChunk(ChunkPos chunkPos)
+Chunk* Planet::GetChunk(const glm::ivec3& chunkPos)
 {
 	chunkMutex.lock();
 	if (chunks.find(chunkPos) == chunks.end())

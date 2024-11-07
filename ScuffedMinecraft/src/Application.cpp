@@ -441,7 +441,7 @@ int main(int argc, char* argv[])
 		int localBlockY = blockY - (chunkY * CHUNK_SIZE);
 		int localBlockZ = blockZ - (chunkZ * CHUNK_SIZE);
 
-		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
+		Chunk* chunk = Planet::planet->GetChunk(glm::ivec3(chunkX, chunkY, chunkZ));
 		if (chunk != nullptr)
 		{
 			unsigned int blockType = chunk->GetBlockAtPos(
@@ -640,7 +640,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		int localBlockY = blockY - (chunkY * CHUNK_SIZE);
 		int localBlockZ = blockZ - (chunkZ * CHUNK_SIZE);
 
-		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
+		Chunk* chunk = Planet::planet->GetChunk(glm::ivec3(chunkX, chunkY, chunkZ));
 		uint16_t blockToReplace = chunk->GetBlockAtPos(localBlockX, localBlockY, localBlockZ);
 		if (chunk != nullptr && (blockToReplace == 0 || Blocks::blocks[blockToReplace].blockType == Block::LIQUID))
 			chunk->UpdateBlock(localBlockX, localBlockY, localBlockZ, selectedBlock);

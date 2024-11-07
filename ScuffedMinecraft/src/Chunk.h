@@ -6,13 +6,12 @@
 
 #include "Shader.h"
 #include "Vertex.h"
-#include "ChunkPos.h"
 #include "ChunkData.h"
 
 class Chunk
 {
 public:
-	Chunk(ChunkPos chunkPos, Shader* shader, Shader* waterShader);
+	Chunk(const glm::ivec3& chunkPos, Shader* shader, Shader* waterShader);
 	~Chunk();
 
 	void GenerateChunkMesh();
@@ -30,7 +29,7 @@ public:
 	ChunkData* downData;
 	ChunkData* eastData;
 	ChunkData* westData;
-	ChunkPos chunkPos;
+	glm::ivec3 chunkPos; // why do we have 2 position with the same byte layout and why is worldpos not a int type
 	bool ready;
 	bool generated;
 
