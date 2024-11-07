@@ -8,7 +8,6 @@
 #include <thread>
 #include <mutex>
 
-#include "ChunkPos.h"
 #include "ChunkData.h"
 #include "Chunk.h"
 #include "ChunkPosHash.h"
@@ -22,10 +21,10 @@ public:
 	Planet(Shader* solidShader, Shader* waterShader, Shader* billboardShader);
 	~Planet();
 
-	ChunkData* GetChunkData(ChunkPos chunkPos);
+	ChunkData* GetChunkData(glm::ivec3& chunkPos);
 	void Update(glm::vec3 cameraPos);
 
-	Chunk* GetChunk(ChunkPos chunkPos);
+	Chunk* GetChunk(const glm::ivec3& chunkPos);
 	void ClearChunkQueue();
 
 private:
@@ -39,11 +38,11 @@ public:
 	int renderHeight = 3;
 
 private:
-	std::unordered_map<ChunkPos, Chunk*, ChunkPosHash> chunks;
-	std::unordered_map<ChunkPos, ChunkData*, ChunkPosHash> chunkData;
-	std::queue<ChunkPos> chunkQueue;
-	std::queue<ChunkPos> chunkDataQueue;
-	std::queue<ChunkPos> chunkDataDeleteQueue;
+	std::unordered_map<glm::ivec3, Chunk*, ChunkPosHash> chunks;
+	std::unordered_map<glm::ivec3, ChunkData*, ChunkPosHash> chunkData;
+	std::queue<glm::ivec3> chunkQueue;
+	std::queue<glm::ivec3> chunkDataQueue;
+	std::queue<glm::ivec3> chunkDataDeleteQueue;
 	unsigned int chunksLoading = 0;
 	int lastCamX = -100, lastCamY = -100, lastCamZ = -100;
 	int camChunkX = -100, camChunkY = -100, camChunkZ = -100;

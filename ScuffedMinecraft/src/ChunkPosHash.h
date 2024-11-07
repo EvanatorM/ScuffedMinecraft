@@ -1,9 +1,11 @@
-#include "ChunkPos.h"
+#pragma once
+
 #include <unordered_map>
+#include <glm/glm.hpp>
 
 struct ChunkPosHash
 {
-	std::size_t operator()(const ChunkPos& key) const
+	std::size_t operator()(const glm::ivec3& key) const
 	{
 		std::size_t hx = std::hash<int>()(key.x);
 		std::size_t hy = std::hash<int>()(key.y);

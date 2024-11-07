@@ -18,12 +18,12 @@ inline int ChunkData::GetIndex(int x, int y, int z) const
 	return x * CHUNK_SIZE * CHUNK_SIZE + z * CHUNK_SIZE + y;
 }
 
-inline int ChunkData::GetIndex(ChunkPos localBlockPos) const
+inline int ChunkData::GetIndex(const glm::ivec3& localBlockPos) const
 {
 	return localBlockPos.x * CHUNK_SIZE * CHUNK_SIZE + localBlockPos.z * CHUNK_SIZE + localBlockPos.y;
 }
 
-uint16_t ChunkData::GetBlock(ChunkPos blockPos)
+uint16_t ChunkData::GetBlock(const glm::ivec3& blockPos)
 {
 	return data[GetIndex(blockPos)];
 }

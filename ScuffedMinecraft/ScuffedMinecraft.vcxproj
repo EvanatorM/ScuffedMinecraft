@@ -158,7 +158,6 @@
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\ChunkData.cpp" />
-    <ClCompile Include="src\ChunkPos.cpp" />
     <ClCompile Include="src\NoiseSettings.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Planet.cpp" />
@@ -182,7 +181,6 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\ChunkData.h" />
-    <ClInclude Include="src\ChunkPos.h" />
     <ClInclude Include="src\NoiseSettings.h" />
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\Planet.h" />

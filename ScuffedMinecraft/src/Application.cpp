@@ -27,19 +27,19 @@
 #include "Physics.h"
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+void processInput(GLFWwindow* window, ImGuiIO& io);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void updateAvgFps(ImGuiIO& io);
 
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
-int fpsCount = 0;
-std::chrono::steady_clock::time_point fpsStartTime;
-float avgFps = 0;
-float lowestFps = -1;
-float highestFps = -1;
-float lastX = 400, lastY = 300;
+double currentTime = 0.0;
+float avgFps = -1.f;
+#define FPS_SAMPLES 10 // How many samples should be taken to calculate the avgFps
+float fpsSamples[FPS_SAMPLES];
+float minFps = FLT_MAX; // If this isn't big enough then you have a killer pc
+float maxFps = -1.f;
+float lastX = 400.f, lastY = 300.f;
 bool firstMouse = true;
 
 bool menuMode = false;
@@ -62,31 +62,31 @@ GLuint depthTexture;
 
 float rectangleVertices[] =
 {
-	 // Coords     // TexCoords
-	 1.0f, -1.0f,  1.0f, 0.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	-1.0f,  1.0f,  0.0f, 1.0f,
+	// Coords     // TexCoords
+	1.0f, -1.0f,  1.0f, 0.0f,
+   -1.0f, -1.0f,  0.0f, 0.0f,
+   -1.0f,  1.0f,  0.0f, 1.0f,
 
-	 1.0f,  1.0f,  1.0f, 1.0f,
-	 1.0f, -1.0f,  1.0f, 0.0f,
-	-1.0f,  1.0f,  0.0f, 1.0f
+	1.0f,  1.0f,  1.0f, 1.0f,
+	1.0f, -1.0f,  1.0f, 0.0f,
+   -1.0f,  1.0f,  0.0f, 1.0f
 };
 
-float outlineVertices[] = 
+float outlineVertices[] =
 {
 	-.001f, -.001f, -.001f,  1.001f, -.001f, -.001f,
-    1.001f, -.001f, -.001f,  1.001f, 1.001f, -.001f,
+	1.001f, -.001f, -.001f,  1.001f, 1.001f, -.001f,
 	1.001f, 1.001f, -.001f,  -.001f, 1.001f, -.001f,
 	-.001f, 1.001f, -.001f,  -.001f, -.001f, -.001f,
-	   		   		   							
+
 	-.001f, -.001f, -.001f,  -.001f, -.001f, 1.001f,
 	-.001f, -.001f, 1.001f,  -.001f, 1.001f, 1.001f,
 	-.001f, 1.001f, 1.001f,  -.001f, 1.001f, -.001f,
-	   		   		   							
+
 	1.001f, -.001f, -.001f,  1.001f, -.001f, 1.001f,
 	1.001f, -.001f, 1.001f,  1.001f, 1.001f, 1.001f,
 	1.001f, 1.001f, 1.001f,  1.001f, 1.001f, -.001f,
-	   		   		   							
+
 	-.001f, -.001f, 1.001f,  1.001f, -.001f, 1.001f,
 	-.001f, 1.001f, 1.001f,  1.001f, 1.001f, 1.001f,
 };
@@ -96,13 +96,13 @@ float crosshairVertices[] =
 	windowX / 2 - 13.5, windowY / 2 - 13.5,  0.0f, 0.0f,
 	windowX / 2 + 13.5, windowY / 2 - 13.5,  1.0f, 0.0f,
 	windowX / 2 + 13.5, windowY / 2 + 13.5,  1.0f, 1.0f,
-				  					 
+
 	windowX / 2 - 13.5, windowY / 2 - 13.5,  0.0f, 0.0f,
 	windowX / 2 - 13.5, windowY / 2 + 13.5,  0.0f, 1.0f,
 	windowX / 2 + 13.5, windowY / 2 + 13.5,  1.0f, 1.0f,
 };
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 #ifdef LINUX
 	char* resolved_path = realpath(argv[0], NULL);
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	
+
 	// Create window
 	GLFWwindow* window = glfwCreateWindow(windowX, windowY, "Scuffed Minecraft", nullptr, nullptr);
 	if (window == nullptr)
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
 	glGenTextures(1, &texture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	 
+
 	// Set texture parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -318,6 +318,10 @@ int main(int argc, char *argv[])
 
 	glm::mat4 ortho = glm::ortho(0.0f, (float)windowX, (float)windowY, 0.0f, 0.0f, 10.0f);
 
+	std::fill(fpsSamples, fpsSamples + FPS_SAMPLES, -1.0f);
+	for (int i = 0; i < FPS_SAMPLES; i++)
+		std::cout << fpsSamples[i] << std::endl;
+
 	// Initialize ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -326,39 +330,26 @@ int main(int argc, char *argv[])
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
-	fpsStartTime = std::chrono::steady_clock::now();
-
 	while (!glfwWindowShouldClose(window))
 	{
-		// Delta Time
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		// Get time
+		currentTime = glfwGetTime();
 
-		// FPS Calculations
-		float fps = 1.0f / deltaTime;
-		if (lowestFps == -1 || fps < lowestFps)
-			lowestFps = fps;
-		if (highestFps == -1 || fps > highestFps)
-			highestFps = fps;
-		fpsCount++;
-		std::chrono::steady_clock::time_point currentTimePoint = std::chrono::steady_clock::now();
-		if (std::chrono::duration_cast<std::chrono::seconds>(currentTimePoint - fpsStartTime).count() >= 1)
-		{
-			avgFps = fpsCount;
-			lowestFps = -1;
-			highestFps = -1;
-			fpsCount = 0;
-			fpsStartTime = currentTimePoint;
-		}
+		// Fetching max/min fps
+		if (minFps > io.Framerate)
+			minFps = io.Framerate;
+		if (maxFps < io.Framerate)
+			maxFps = io.Framerate;
+		updateAvgFps(io);
+
 
 		waterShader.use();
-		waterShader.setFloat("time", currentFrame);
+		waterShader.setUniform("time", currentTime);
 		outlineShader.use();
-		outlineShader.setFloat("time", currentFrame);
+		outlineShader.setUniform("time", currentTime);
 
 		// Input
-		processInput(window);
+		processInput(window, io);
 
 		// Rendering
 		glEnable(GL_DEPTH_TEST);
@@ -450,7 +441,7 @@ int main(int argc, char *argv[])
 		int localBlockY = blockY - (chunkY * CHUNK_SIZE);
 		int localBlockZ = blockZ - (chunkZ * CHUNK_SIZE);
 
-		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
+		Chunk* chunk = Planet::planet->GetChunk(glm::ivec3(chunkX, chunkY, chunkZ));
 		if (chunk != nullptr)
 		{
 			unsigned int blockType = chunk->GetBlockAtPos(
@@ -504,8 +495,8 @@ int main(int argc, char *argv[])
 
 			// Draw ImGui UI
 			ImGui::Begin("Test");
-			ImGui::Text("FPS: %d (Avg: %d, Min: %d, Max: %d)", (int)fps, (int)avgFps, (int)lowestFps, (int)highestFps);
-			ImGui::Text("MS: %f", deltaTime * 100.0f);
+			ImGui::Text("FPS: %d (Avg: %d, Min: %d, Max: %d)", (int)io.Framerate, (int)avgFps, (int)minFps, (int)maxFps);
+			ImGui::Text("MS: %f", io.DeltaTime * 100.0f);
 			if (ImGui::Checkbox("VSYNC", &vsync))
 				glfwSwapInterval(vsync ? 1 : 0);
 			ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
@@ -553,7 +544,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowX, windowY, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 }
 
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window, ImGuiIO& io)
 {
 	// Pause
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -585,20 +576,20 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-			camera.ProcessKeyboard(FORWARD_NO_Y, deltaTime);
+			camera.ProcessKeyboard(FORWARD_NO_Y, io.DeltaTime);
 		else
-			camera.ProcessKeyboard(FORWARD, deltaTime);
+			camera.ProcessKeyboard(FORWARD, io.DeltaTime);
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.ProcessKeyboard(BACKWARD, deltaTime);
+		camera.ProcessKeyboard(BACKWARD, io.DeltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.ProcessKeyboard(LEFT, deltaTime);
+		camera.ProcessKeyboard(LEFT, io.DeltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.ProcessKeyboard(RIGHT, deltaTime);
+		camera.ProcessKeyboard(RIGHT, io.DeltaTime);
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		camera.ProcessKeyboard(UP, deltaTime);
+		camera.ProcessKeyboard(UP, io.DeltaTime);
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		camera.ProcessKeyboard(DOWN, deltaTime);
+		camera.ProcessKeyboard(DOWN, io.DeltaTime);
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -632,7 +623,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		int blockX = result.blockX;
 		int blockY = result.blockY;
 		int blockZ = result.blockZ;
-		
+
 		// Choose face to place on
 		if (abs(distX) > abs(distY) && abs(distX) > abs(distZ))
 			blockX += (distX > 0 ? 1 : -1);
@@ -649,7 +640,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		int localBlockY = blockY - (chunkY * CHUNK_SIZE);
 		int localBlockZ = blockZ - (chunkZ * CHUNK_SIZE);
 
-		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
+		Chunk* chunk = Planet::planet->GetChunk(glm::ivec3(chunkX, chunkY, chunkZ));
 		uint16_t blockToReplace = chunk->GetBlockAtPos(localBlockX, localBlockY, localBlockZ);
 		if (chunk != nullptr && (blockToReplace == 0 || Blocks::blocks[blockToReplace].blockType == Block::LIQUID))
 			chunk->UpdateBlock(localBlockX, localBlockY, localBlockZ, selectedBlock);
@@ -679,4 +670,27 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(yoffset);
+}
+
+void updateAvgFps(ImGuiIO& io)
+{
+	float fpsSum = 0.0f; // In case all samples are taken so that we only need one cycle
+	for (int i = 0; i < FPS_SAMPLES; i++)
+	{
+		if (fpsSamples[i] != -1)//If this sample has been taken
+		{
+			fpsSum += fpsSamples[i];
+		}
+		else if (fpsSamples[i] == -1 && i != FPS_SAMPLES - 1) // we need a sample here and are not ready for the avg
+		{
+			fpsSamples[i] = io.Framerate;
+			return; // We continue sampleing next call
+		}
+		else if (i == FPS_SAMPLES - 1) // All sample have been taken
+		{
+			fpsSum += io.Framerate;
+			avgFps = fpsSum / FPS_SAMPLES;
+			std::fill(fpsSamples, fpsSamples + FPS_SAMPLES, -1.0f); // Reset samples
+		}
+	}
 }

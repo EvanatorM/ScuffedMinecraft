@@ -6,8 +6,10 @@ Physics::RaycastResult Physics::Raycast(const glm::vec3 startPos, const glm::vec
 {
 	float currentDistance = 0;
 
-	while (currentDistance < maxDistance)
+	std::cout << "Start raycast" << std::endl;
+	while (currentDistance < maxDistance) // This needs optinazion asap I will chnage this to do a dda traversal
 	{
+		std::cout << "Step" << std::endl;
 		currentDistance += Physics::RAY_STEP;
 		if (currentDistance > maxDistance)
 			currentDistance = maxDistance;
@@ -17,7 +19,7 @@ Physics::RaycastResult Physics::Raycast(const glm::vec3 startPos, const glm::vec
 		int chunkX = resultPos.x >= 0 ? resultPos.x / CHUNK_SIZE : resultPos.x / CHUNK_SIZE - 1;
 		int chunkY = resultPos.y >= 0 ? resultPos.y / CHUNK_SIZE : resultPos.y / CHUNK_SIZE - 1;
 		int chunkZ = resultPos.z >= 0 ? resultPos.z / CHUNK_SIZE : resultPos.z / CHUNK_SIZE - 1;
-		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
+		Chunk* chunk = Planet::planet->GetChunk(glm::ivec3(chunkX, chunkY, chunkZ));
 		if (chunk == nullptr)
 			continue;
 

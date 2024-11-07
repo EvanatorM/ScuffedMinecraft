@@ -103,3 +103,88 @@ void Shader::setFloat(const std::string& name, float value) const
 {
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
+
+void Shader::setUniform(const std::string& uniformName, int val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform1i(uLoc, val);
+}
+void Shader::setUniform(const std::string& uniformName, unsigned int val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform1i(uLoc, val);
+}
+void Shader::setUniform(const std::string& uniformName, float val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform1f(uLoc, val);
+}
+void Shader::setUniform(const std::string& uniformName, double val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform1f(uLoc, val);
+}
+void Shader::setUniform(const std::string& uniformName, glm::vec2 val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform2f(uLoc, val.x, val.y);
+}
+void Shader::setUniform(const std::string& uniformName, glm::vec3 val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform3f(uLoc, val.x, val.y, val.z);
+}
+void Shader::setUniform(const std::string& uniformName, glm::ivec3 val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniform3f(uLoc, val.x, val.y, val.z);
+}
+void Shader::setUniform(const std::string& uniformName, glm::mat3 val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniformMatrix3fv(uLoc, 1, GL_TRUE, &val[0][0]);
+}
+void Shader::setUniform(const std::string& uniformName, glm::mat4 val)
+{
+	int uLoc = getUniformID(uniformName);
+	if (uLoc < 0)
+		return;
+	glUniformMatrix4fv(uLoc, 1, GL_TRUE, &val[0][0]);
+}
+
+int Shader::getUniformID(const std::string& uniformName) const
+{
+	int uLoc = glGetUniformLocation(ID, uniformName.c_str());
+	if (errorOccurd("While fetching location for uniform with the name " + uniformName))
+		return -1;
+	return uLoc; // Is only callable if no error happens
+}
+
+bool Shader::errorOccurd(const std::string& origin) const
+{
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+	{
+		std::cerr << origin << " || A OpenGL error occurd with the code " << err;
+		std::cerr << std::endl;
+
+		return true;
+	}
+	return false;
+}

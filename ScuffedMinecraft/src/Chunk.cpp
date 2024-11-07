@@ -10,7 +10,7 @@
 #include "Blocks.h"
 #include "WorldGen.h"
 
-Chunk::Chunk(ChunkPos chunkPos, Shader* shader, Shader* waterShader)
+Chunk::Chunk(const glm::ivec3& chunkPos, Shader* shader, Shader* waterShader) // We are not using the passed shaders ??
 	: chunkPos(chunkPos)
 {
 	worldPos = glm::vec3(chunkPos.x * (float)CHUNK_SIZE, chunkPos.y * (float)CHUNK_SIZE, chunkPos.z * (float)CHUNK_SIZE);
