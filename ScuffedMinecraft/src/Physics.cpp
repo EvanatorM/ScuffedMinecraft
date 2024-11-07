@@ -6,8 +6,10 @@ Physics::RaycastResult Physics::Raycast(const glm::vec3 startPos, const glm::vec
 {
 	float currentDistance = 0;
 
-	while (currentDistance < maxDistance)
+	std::cout << "Start raycast" << std::endl;
+	while (currentDistance < maxDistance) // This needs optinazion asap I will chnage this to do a dda traversal
 	{
+		std::cout << "Step" << std::endl;
 		currentDistance += Physics::RAY_STEP;
 		if (currentDistance > maxDistance)
 			currentDistance = maxDistance;

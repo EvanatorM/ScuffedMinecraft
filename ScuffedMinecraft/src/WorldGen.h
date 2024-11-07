@@ -1,10 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <glm/glm.hpp>
+
 #include "NoiseSettings.h"
 #include "SurfaceFeature.h"
 #include "ChunkData.h"
-#include "glm/glm.hpp"
 
 namespace WorldGen
 {
