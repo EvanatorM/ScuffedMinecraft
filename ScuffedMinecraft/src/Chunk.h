@@ -29,7 +29,7 @@ public:
 	ChunkData* downData;
 	ChunkData* eastData;
 	ChunkData* westData;
-	glm::ivec3 chunkPos; // why do we have 2 position with the same byte layout and why is worldpos not a int type
+	glm::ivec3 chunkPos; 
 	bool ready;
 	bool generated;
 
