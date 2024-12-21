@@ -518,10 +518,10 @@ int main(int argc, char *argv[])
 				Planet::planet->ClearChunkQueue();
 			ImGui::Checkbox("Use absolute Y axis for camera vertical movement", &camera.absoluteVerticalMovement);
 			ImGui::End();
-
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Check and call events and swap buffers
 		glfwSwapBuffers(window);
