@@ -32,7 +32,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
-bool inEscMenu = false;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 int fpsCount = 0;
@@ -565,7 +564,6 @@ void processInput(GLFWwindow* window)
 		escapeDown = true;
 		menuMode = !menuMode;
 		glfwSetInputMode(window, GLFW_CURSOR, menuMode ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-		inEscMenu = menuMode;
 		firstMouse = true;
 		//glfwSetWindowShouldClose(window, true);
 	}
@@ -605,7 +603,7 @@ void processInput(GLFWwindow* window)
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (inEscMenu) return;
+	if (menuMode) return;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		auto result = Physics::Raycast(camera.Position, camera.Front, 5);
