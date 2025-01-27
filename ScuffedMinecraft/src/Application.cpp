@@ -50,6 +50,9 @@ bool f1Down = false;
 // Window settings
 float windowX = 1920;
 float windowY = 1080;
+float oldWindowX = 1920;
+float oldWindowY = 1080;
+int windowedXPos, windowedYPos;
 bool vsync = true;
 bool fullscreen = false;
 bool prevFullscreen = false;
@@ -533,13 +536,18 @@ int main(int argc, char *argv[])
 		{
 			if (fullscreen)
 			{
+				oldWindowX = windowX;
+				oldWindowY = windowY;
+				glfwGetWindowPos(window, &windowedXPos, &windowedYPos);
 				GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 				const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 				glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 			}
 			else 
 			{
-				glfwSetWindowMonitor(window, nullptr, 0, 0, windowX, windowY, 0);
+				windowX = oldWindowX;
+				windowY = oldWindowY;
+				glfwSetWindowMonitor(window, nullptr, windowedXPos, windowedYPos, windowX, windowY, 0);
 			}
 			prevFullscreen = !prevFullscreen;
 		};

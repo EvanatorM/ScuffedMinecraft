@@ -177,7 +177,7 @@
     <ClCompile Include="vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
+    <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\Block.h" />
     <ClInclude Include="src\Blocks.h" />
     <ClInclude Include="src\Camera.h" />
