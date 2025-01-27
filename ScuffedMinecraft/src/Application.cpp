@@ -532,7 +532,6 @@ int main(int argc, char *argv[])
 			ImGui::Checkbox("Use absolute Y axis for camera vertical movement", &camera.absoluteVerticalMovement);
 			ImGui::Checkbox("Fullscreen", &fullscreen);
 			ImGui::End();
-
 		}
 		
 		ImGui::Render();
@@ -553,6 +552,9 @@ int main(int argc, char *argv[])
 			}
 			prevFullscreen = !prevFullscreen;
 		};
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Check and call events and swap buffers
 		glfwSwapBuffers(window);
