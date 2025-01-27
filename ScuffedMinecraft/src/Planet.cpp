@@ -39,13 +39,15 @@ void Planet::Update(glm::vec3 cameraPos)
 	{
 		numChunks++;
 
-		if (!(*it->second).ready)
+		Chunk& chunk = *it->second;
+
+		if (!chunk.ready)
 			chunksLoading++;
 
-		int chunkX = (*it->second).chunkPos.x;
-		int chunkY = (*it->second).chunkPos.y;
-		int chunkZ = (*it->second).chunkPos.z;
-		if ((*it->second).ready && (abs(chunkX - camChunkX) > renderDistance ||
+		int chunkX = chunk.chunkPos.x;
+		int chunkY = chunk.chunkPos.y;
+		int chunkZ = chunk.chunkPos.z;
+		if ( chunk.ready && (abs(chunkX - camChunkX) > renderDistance ||
 			abs(chunkY - camChunkY) > renderDistance ||
 			abs(chunkZ - camChunkZ) > renderDistance))
 		{
@@ -60,13 +62,13 @@ void Planet::Update(glm::vec3 cameraPos)
 			chunkDataDeleteQueue.push({ chunkX, chunkY, chunkZ - 1 });
 
 			// Delete chunk
-			delete it->second;
+			delete it->second; // &chunk
 			it = chunks.erase(it);
 		}
 		else
 		{
 			numChunksRendered++;
-			(*it->second).Render(solidShader, billboardShader);
+			chunk.Render(solidShader, billboardShader);
 			++it;
 		}
 	}
@@ -75,11 +77,13 @@ void Planet::Update(glm::vec3 cameraPos)
 	waterShader->use();
 	for (auto it = chunks.begin(); it != chunks.end(); )
 	{
-		int chunkX = (*it->second).chunkPos.x;
-		int chunkY = (*it->second).chunkPos.y;
-		int chunkZ = (*it->second).chunkPos.z;
+		Chunk& chunk = *it->second;
 
-		(*it->second).RenderWater(waterShader);
+		int chunkX = chunk.chunkPos.x;
+		int chunkY = chunk.chunkPos.y;
+		int chunkZ = chunk.chunkPos.z;
+
+		chunk.RenderWater(waterShader);
 		++it;
 	}
 
@@ -102,10 +106,15 @@ void Planet::ChunkThreadUpdate()
 				chunks.find({ pos.x, pos.y, pos.z + 1 }) == chunks.end() &&
 				chunks.find({ pos.x, pos.y, pos.z - 1 }) == chunks.end())
 			{
-				delete chunkData.at(pos);
-				chunkData.erase(pos);
+				chunkMutex.lock();
+				delete it->second;
+				it = chunkData.erase( it );
+				chunkMutex.unlock();
 			}
-			++it;
+			else
+			{
+				++it;
+			}
 		}
 
 		// Check if camera moved to new chunk
