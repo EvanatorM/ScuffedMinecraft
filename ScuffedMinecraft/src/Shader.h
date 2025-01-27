@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <glm/fwd.hpp>
 
 class Shader
 {
@@ -13,7 +14,12 @@ public:
 	// use/activate the shader
 	void use();
 	// utility uniform functions
-	void setBool(const std::string& name, bool value) const;
-	void setInt(const std::string& name, int value) const;
-	void setFloat(const std::string& name, float value) const;
+	void setBool(const std::string& name, bool value);
+	void setInt(const std::string& name, int value);
+	void setFloat(const std::string& name, float value);
+
+	void setMat4x4f( const std::string& name, const glm::mat4& matrix );
+	
+private:
+
 };
