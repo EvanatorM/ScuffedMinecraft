@@ -603,6 +603,7 @@ void processInput(GLFWwindow* window)
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+	if (menuMode) return;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		auto result = Physics::Raycast(camera.Position, camera.Front, 5);
