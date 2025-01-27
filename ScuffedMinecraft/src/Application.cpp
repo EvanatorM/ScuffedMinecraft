@@ -35,6 +35,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 int fpsCount = 0;
+int fpsCap = 240;
 std::chrono::steady_clock::time_point fpsStartTime;
 float avgFps = 0;
 float lowestFps = -1;
@@ -50,6 +51,8 @@ bool f1Down = false;
 float windowX = 1920;
 float windowY = 1080;
 bool vsync = true;
+bool fullscreen = false;
+bool prevFullscreen = false;
 
 uint16_t selectedBlock = 1;
 
@@ -334,9 +337,18 @@ int main(int argc, char *argv[])
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+		float desiredDeltaTime = 1.0f / fpsCap;
+		float correction = 0.0f;
+		if (desiredDeltaTime > deltaTime) 
+		{
+			correction = desiredDeltaTime - deltaTime;
+		};
+
+		// FPS Correction
+		std::this_thread::sleep_for(std::chrono::duration<float>(correction));
 
 		// FPS Calculations
-		float fps = 1.0f / deltaTime;
+		float fps = 1.0f / (deltaTime + correction);
 		if (lowestFps == -1 || fps < lowestFps)
 			lowestFps = fps;
 		if (highestFps == -1 || fps > highestFps)
@@ -503,9 +515,10 @@ int main(int argc, char *argv[])
 			glDisable(GL_COLOR_LOGIC_OP);
 
 			// Draw ImGui UI
-			ImGui::Begin("Test");
+			ImGui::Begin("Test", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 			ImGui::Text("FPS: %d (Avg: %d, Min: %d, Max: %d)", (int)fps, (int)avgFps, (int)lowestFps, (int)highestFps);
-			ImGui::Text("MS: %f", deltaTime * 100.0f);
+			ImGui::Text("MS: %f", (deltaTime + correction) * 100.0f);
+			ImGui::InputInt("FPS Cap", &fpsCap);
 			if (ImGui::Checkbox("VSYNC", &vsync))
 				glfwSwapInterval(vsync ? 1 : 0);
 			ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
@@ -517,11 +530,29 @@ int main(int argc, char *argv[])
 			if (ImGui::SliderInt("Render Height", &Planet::planet->renderHeight, 0, 10))
 				Planet::planet->ClearChunkQueue();
 			ImGui::Checkbox("Use absolute Y axis for camera vertical movement", &camera.absoluteVerticalMovement);
+			ImGui::Checkbox("Fullscreen", &fullscreen);
 			ImGui::End();
 
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
+		
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Toggling Fullscreen
+		if (fullscreen != prevFullscreen)
+		{
+			if (fullscreen)
+			{
+				GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+				const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+				glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+			}
+			else 
+			{
+				glfwSetWindowMonitor(window, nullptr, 0, 0, windowX, windowY, 0);
+			}
+			prevFullscreen = !prevFullscreen;
+		};
 
 		// Check and call events and swap buffers
 		glfwSwapBuffers(window);
