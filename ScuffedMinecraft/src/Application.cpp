@@ -9,6 +9,7 @@
 #include <unistd.h>
 #endif
 
+#include "../ConfigLoader.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -138,6 +139,17 @@ int main(int argc, char *argv[])
 	chdir(resolved_path);
 	free(resolved_path);
 #endif
+	// Init ConfigLoader
+	ConfigLoader::InitializeConfigMap();
+	ConfigLoader::LoadConfig();
+
+	// Clear configMap that was initialised to save on ressources ig?
+	if (!ConfigLoader::bUseCustomConfiguration == true)
+	{
+		std::cout << "bUseCustomConfiguration is set to " << ConfigLoader::bUseCustomConfiguration << ", ignoring all Custom Configurations from Config.ini!" << std::endl;
+		ConfigLoader::configMap.clear();
+	}
+
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
