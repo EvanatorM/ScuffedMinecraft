@@ -32,6 +32,7 @@ void processInput(GLFWwindow* window);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void draw_hotbar_box(int index, void* texture);
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -58,7 +59,13 @@ bool vsync = true;
 bool fullscreen = false;
 bool prevFullscreen = false;
 
-uint16_t selectedBlock = 1;
+int selectedSlot = 0;
+uint16_t blocksInEquipment[] = 
+{
+	0, 0, 0,
+	0, 0, 0,
+	0, 0, 0
+};
 
 bool uiEnabled = true;
 
@@ -300,6 +307,7 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "Failed to load texture\n";
 	}
+	ImTextureID block_map = (ImTextureID)texture;
 
 	stbi_image_free(data);
 
@@ -530,7 +538,7 @@ int main(int argc, char *argv[])
 			ImGui::Text("Chunks: %d (%d rendered)", Planet::planet->numChunks, Planet::planet->numChunksRendered);
 			ImGui::Text("Position: x: %f, y: %f, z: %f", camera.Position.x, camera.Position.y, camera.Position.z);
 			ImGui::Text("Direction: x: %f, y: %f, z: %f", camera.Front.x, camera.Front.y, camera.Front.z);
-			ImGui::Text("Selected Block: %s", Blocks::blocks[selectedBlock].blockName.c_str());
+			ImGui::Text("Selected Block: %s", Blocks::blocks[blocksInEquipment[selectedSlot]].blockName.c_str());
 			if (ImGui::SliderInt("Render Distance", &Planet::planet->renderDistance, 0, 30))
 				Planet::planet->ClearChunkQueue();
 			if (ImGui::SliderInt("Render Height", &Planet::planet->renderHeight, 0, 10))
@@ -538,6 +546,22 @@ int main(int argc, char *argv[])
 			ImGui::Checkbox("Use absolute Y axis for camera vertical movement", &camera.absoluteVerticalMovement);
 			ImGui::Checkbox("Fullscreen", &fullscreen);
 			ImGui::End();
+
+			// Draw Hotbar
+			ImGui::SetNextWindowPos(ImVec2(windowX / 2, windowY - windowY * 0.1f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+			ImGui::SetNextWindowSize(ImVec2(9 * 100, 100));
+			ImGui::SetNextWindowBgAlpha(0.2f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 6);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+			ImGui::Begin("Hotbar", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar);
+			for (int i = 0; i < 9; i++)
+			{
+				draw_hotbar_box(i, block_map);
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 100);
+			}
+			ImGui::End();
+			ImGui::PopStyleVar();
+			ImGui::PopStyleVar();
 		}
 		
 		ImGui::Render();
@@ -583,6 +607,74 @@ int main(int argc, char *argv[])
 	glfwTerminate();
 }
 
+void draw_hotbar_box(int index, void* texture)
+{
+	ImU32 colors = IM_COL32(80, 80, 80, 100);
+	float size = 100.0f;
+
+	Block block = Blocks::blocks[blocksInEquipment[index]];
+
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	
+	ImVec2 p_min = ImGui::GetCursorScreenPos();
+	ImVec2 p_max = ImVec2(p_min.x + size, p_min.y + size);
+
+	if (index == selectedSlot)
+	{
+		draw_list->AddRectFilled(p_min, p_max, colors);
+	}
+
+	draw_list->AddRect(p_min, p_max, colors);
+
+	float atlas = 256.0f;
+
+	ImVec2 imageMin = ImVec2(p_min.x + 10, p_min.y + 10);
+	ImVec2 imageMax = ImVec2(p_max.x - 10, p_max.y - 10);
+	if (block.blockType == Block::BILLBOARD) 
+	{
+		ImVec2 uvSideMax = ImVec2(block.sideMinX * 16 / atlas, block.sideMinY * 16 / atlas);
+		ImVec2 uvSideMin = ImVec2(block.sideMaxX * 16 / atlas, block.sideMaxY * 16 / atlas);
+		draw_list->AddImage(texture, imageMin, imageMax, uvSideMin, uvSideMax);
+	}
+	else if (block.blockType == Block::SOLID || block.blockType == Block::LEAVES)
+	{
+		ImVec2 uvSideMin = ImVec2(block.sideMinX * 16 / atlas, block.sideMinY * 16 / atlas);
+		ImVec2 uvSideMax = ImVec2(block.sideMaxX * 16 / atlas, block.sideMaxY * 16 / atlas);
+		ImVec2 uvTopMin = ImVec2(block.topMaxX * 16 / atlas, block.topMaxY * 16 / atlas);
+		ImVec2 uvTopMax = ImVec2(block.topMinX * 16 / atlas, block.topMinY * 16 / atlas);
+		float cubeSize = size * 0.4f;
+		float offsetY = cubeSize * 0.5f;
+		float padX = size * 0.2f;
+		float padY = size * 0.2f;
+
+		ImVec2 topFrontLeft  = ImVec2(p_min.x + 0.75f * cubeSize + padX, p_min.y + padY);
+		ImVec2 topFrontRight = ImVec2(p_min.x + 1.5f * cubeSize + padX, p_min.y + offsetY / 2 + padY);
+		ImVec2 topBackLeft   = ImVec2(p_min.x + padX, p_min.y + offsetY / 2 + padY);
+		ImVec2 topBackRight  = ImVec2(p_min.x + 0.75f * cubeSize + padX, p_min.y + offsetY + padY);
+	
+		// ImVec2 bottomFrontLeft  = ImVec2(p_min.x + 0.75f * cubeSize  + padX, p_min.y + cubeSize + padY);
+		ImVec2 bottomFrontRight = ImVec2(p_min.x + 1.5f * cubeSize + padX, p_min.y + cubeSize + offsetY / 2 + padY);
+		ImVec2 bottomBackLeft   = ImVec2(p_min.x + padX, p_min.y + cubeSize + offsetY / 2 + padY);
+		ImVec2 bottomBackRight  = ImVec2(p_min.x + 0.75f * cubeSize + padX, p_min.y + cubeSize + offsetY + padY);
+		
+		ImU32 shadow = IM_COL32(0, 0, 0, 100);
+
+		// Draw Top
+		draw_list->AddImageQuad(texture, topBackLeft, topBackRight, topFrontRight, topFrontLeft, uvTopMin, 
+			ImVec2(uvTopMax.x, uvTopMin.y), uvTopMax, ImVec2(uvTopMin.x, uvTopMax.y));
+
+		// Draw Left
+		draw_list->AddImageQuad(texture, bottomBackLeft, bottomBackRight, topBackRight, topBackLeft, uvSideMin, 
+			ImVec2(uvSideMax.x, uvSideMin.y), uvSideMax, ImVec2(uvSideMin.x, uvSideMax.y));
+		
+		// Draw Right
+		draw_list->AddImageQuad(texture, bottomBackRight, bottomFrontRight, topFrontRight, topBackRight,  uvSideMin, 
+			ImVec2(uvSideMax.x, uvSideMin.y), uvSideMax, ImVec2(uvSideMin.x, uvSideMax.y));
+		draw_list->AddQuadFilled(ImVec2(bottomBackRight.x, bottomBackRight.y - 0.75f), ImVec2(bottomFrontRight.x, bottomFrontRight.y - 0.75f), 
+			topFrontRight, topBackRight, shadow);
+	}
+}
+
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	windowX = width;
@@ -599,6 +691,27 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 
 void processInput(GLFWwindow* window)
 {
+	// Change Item
+	int buttons[] = 
+	{
+		GLFW_KEY_1,
+		GLFW_KEY_2,
+		GLFW_KEY_3,
+		GLFW_KEY_4,
+		GLFW_KEY_5,
+		GLFW_KEY_6,
+		GLFW_KEY_7,
+		GLFW_KEY_8,
+		GLFW_KEY_9,
+	};
+	for (int i = 0; i < 9; i++)
+	{
+		if (glfwGetKey(window, buttons[i]) == GLFW_PRESS)
+		{
+			selectedSlot = i;
+		}
+	};
+
 	// Pause
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
@@ -662,7 +775,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		if (!result.hit)
 			return;
 
-		selectedBlock = result.chunk->GetBlockAtPos(result.localBlockX, result.localBlockY, result.localBlockZ);
+		blocksInEquipment[selectedSlot] = result.chunk->GetBlockAtPos(result.localBlockX, result.localBlockY, result.localBlockZ);
 	}
 	else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 	{
@@ -697,7 +810,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 		Chunk* chunk = Planet::planet->GetChunk(ChunkPos(chunkX, chunkY, chunkZ));
 		uint16_t blockToReplace = chunk->GetBlockAtPos(localBlockX, localBlockY, localBlockZ);
 		if (chunk != nullptr && (blockToReplace == 0 || Blocks::blocks[blockToReplace].blockType == Block::LIQUID))
-			chunk->UpdateBlock(localBlockX, localBlockY, localBlockZ, selectedBlock);
+		chunk->UpdateBlock(localBlockX, localBlockY, localBlockZ, blocksInEquipment[selectedSlot]);
 	}
 }
 
@@ -723,5 +836,20 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	camera.ProcessMouseScroll(yoffset);
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) 
+	{
+		camera.ProcessMouseScroll(yoffset);
+	} 
+	else 
+	{
+		selectedSlot -= yoffset;
+		if (selectedSlot > 8)
+		{
+			selectedSlot = 0;
+		}
+		else if (selectedSlot < 0)
+		{
+			selectedSlot = 8;
+		}
+	}
 }
