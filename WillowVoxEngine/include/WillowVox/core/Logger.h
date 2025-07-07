@@ -24,7 +24,7 @@ namespace WillowVox
 		{
 			std::time_t t = std::time(nullptr);
 			std::tm now;
-			localtime_s(&now, &t);
+			localtime_r(&t, &now);
 			printf(LOG_COLOR_RESET "[%d:%d:%d App] ", now.tm_hour, now.tm_min, now.tm_sec);
 			printf(msg, args...);
 			printf("\n");
@@ -44,7 +44,7 @@ namespace WillowVox
 		{
 			std::time_t t = std::time(nullptr);
 			std::tm now;
-			localtime_s(&now, &t);
+			localtime_r(&t, &now);
 			printf(LOG_COLOR_APP_WARN "[%d:%d:%d App] WARN: ", now.tm_hour, now.tm_min, now.tm_sec);
 			printf(msg, args...);
 			printf(LOG_COLOR_RESET "\n");
@@ -64,7 +64,7 @@ namespace WillowVox
 		{
 			std::time_t t = std::time(nullptr);
 			std::tm now;
-			localtime_s(&now, &t);
+			localtime_r(&t, &now);
 			printf(LOG_COLOR_APP_ERROR "[%d:%d:%d App] ERROR: ", now.tm_hour, now.tm_min, now.tm_sec);
 			printf(msg, args...);
 			printf(LOG_COLOR_RESET "\n");
@@ -85,7 +85,7 @@ namespace WillowVox
 		{
 			std::time_t t = std::time(nullptr);
 			std::tm now;
-			localtime_s(&now, &t);
+			localtime_r(&t, &now);
 			printf(LOG_COLOR_ENGINE_LOG "[%d:%d:%d Engine] ", now.tm_hour, now.tm_min, now.tm_sec);
 			printf(msg, args...);
 			printf(LOG_COLOR_RESET "\n");
@@ -105,7 +105,7 @@ namespace WillowVox
 		{
 			std::time_t t = std::time(nullptr);
 			std::tm now;
-			localtime_s(&now, &t);
+			localtime_r(&t, &now);
 			printf(LOG_COLOR_ENGINE_WARN "[%d:%d:%d Engine] WARN: ", now.tm_hour, now.tm_min, now.tm_sec);
 			printf(msg, args...);
 			printf(LOG_COLOR_RESET "\n");
@@ -125,7 +125,7 @@ namespace WillowVox
 		{
 			std::time_t t = std::time(nullptr);
 			std::tm now;
-			localtime_s(&now, &t);
+			localtime_r(&t, &now);
 			printf(LOG_COLOR_ENGINE_ERROR "[%d:%d:%d Engine] ERROR: ", now.tm_hour, now.tm_min, now.tm_sec);
 			printf(msg, args...);
 			printf(LOG_COLOR_RESET "\n");
