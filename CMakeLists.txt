@@ -7,13 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(ScuffedMinecraft 
     src/main.cpp
     
-    src/physics/VoxelRaycast.cpp
-
     src/ui/UIManager.cpp
-    
-    src/world/ChunkManager.cpp
-    src/world/ChunkRenderer.cpp
-    src/world/WorldGen.cpp
+
+    src/world/ScuffedWorldGen.cpp
 )
 
 target_include_directories(ScuffedMinecraft PRIVATE include)

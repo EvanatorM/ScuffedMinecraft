@@ -4,10 +4,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <wv/rendering/VertexArrayObject.h>
-#include <world/ChunkManager.h>
-#include <world/BlockRegistry.h>
-#include <world/WorldGen.h>
-#include <physics/VoxelRaycast.h>
+#include <wv/VoxelWorlds.h>
+#include <world/ScuffedWorldGen.h>
 #include <ui/UIManager.h>
 #include <cstdlib>
 
@@ -37,16 +35,17 @@ namespace ScuffedMinecraft
 
             // Register blocks
             auto& blockRegistry = BlockRegistry::GetInstance();
-            blockRegistry.RegisterBlock("Dirt Block", "dirt_block.png");
-            blockRegistry.RegisterBlock("Grass Block", "grass_block.png", "dirt_block.png", "grass_block_side.png");
-            blockRegistry.RegisterBlock("Stone Block", "stone_block.png");
+            blockRegistry.RegisterBlock("dirt_block", "dirt_block.png");
+            blockRegistry.RegisterBlock("grass_block", "grass_block.png", "dirt_block.png", "grass_block_side.png");
+            blockRegistry.RegisterBlock("stone_block", "stone_block.png");
 
             blockRegistry.ApplyRegistry();
 
-            WorldGen::InitWorldGen();
+            ScuffedWorldGen::InitWorldGen();
 
             // Create chunk manager
-            chunkManager = std::make_unique<ChunkManager>(0, 0, 10, 0);
+            worldGen = std::make_unique<ScuffedWorldGen>();
+            chunkManager = std::make_unique<ChunkManager>(worldGen.get(), 0, 0, 10, 0);
             chunkManager->SetCamera(m_camera.get());
             chunkManager->SetRenderDistance(5, 2);
 
@@ -195,7 +194,7 @@ namespace ScuffedMinecraft
                 (int)(m_camera->m_position.x < 0 ? (m_camera->m_position.x / CHUNK_SIZE) - 1 : m_camera->m_position.x / CHUNK_SIZE), 
                 (int)(m_camera->m_position.y < 0 ? (m_camera->m_position.y / CHUNK_SIZE) - 1 : m_camera->m_position.y / CHUNK_SIZE), 
                 (int)(m_camera->m_position.z < 0 ? (m_camera->m_position.z / CHUNK_SIZE) - 1 : m_camera->m_position.z / CHUNK_SIZE));
-            ImGui::Text("Selected Block: %s", m_registry->GetBlock(m_selectedBlock).name.c_str());
+            ImGui::Text("Selected Block: %s", m_registry->GetBlock(m_selectedBlock).strId.c_str());
             ImGui::Checkbox("Vysnc", &m_vsync);
             if (m_vsync != Renderer::VysncEnabled())
                 Renderer::SetVsync(m_vsync);
@@ -211,6 +210,7 @@ namespace ScuffedMinecraft
         int m_frameCount = 0;
         int m_fps = 0;
 
+        std::unique_ptr<WorldGen> worldGen;
         std::unique_ptr<ChunkManager> chunkManager;
 
         std::unique_ptr<Camera> m_camera;

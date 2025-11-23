@@ -1,20 +1,6 @@
 include(FetchContent)
 
-macro(_add_engine_git_module NAME REPO COMMIT)
-  message(STATUS "Module: ${NAME} @ ${COMMIT}")
-  FetchContent_Declare(${NAME}
-    GIT_REPOSITORY ${REPO}
-    GIT_TAG        ${COMMIT}      # exact commit from lockfile
-    GIT_SHALLOW    TRUE
-    UPDATE_DISCONNECTED FALSE
-  )
-  FetchContent_MakeAvailable(${NAME})
-
-  target_link_libraries(${PROJECT_NAME} PRIVATE ${NAME})
-  target_include_directories(${PROJECT_NAME} PRIVATE ${${NAME}_SOURCE_DIR}/include)
-endmacro()
-
-macro(_fetch_git_module NAME REPO COMMIT)
+macro(_fetch_git_project NAME REPO COMMIT)
   message(STATUS "Module: ${NAME} @ ${COMMIT}")
   FetchContent_Declare(${NAME}
     GIT_REPOSITORY ${REPO}
@@ -26,10 +12,16 @@ macro(_fetch_git_module NAME REPO COMMIT)
 endmacro()
 
 # Add engine modules
-_add_engine_git_module(WVCore https://github.com/EvanatorM/WV-Core.git alpha-v0.2.3)
+_fetch_git_project(WVCore https://github.com/EvanatorM/WV-Core.git alpha-v0.2.3)
+target_link_libraries(${PROJECT_NAME} PUBLIC WVCore)
+target_include_directories(${PROJECT_NAME} PUBLIC ${wvcore_SOURCE_DIR}/include)
+
+_fetch_git_project(WVVoxelWorlds https://github.com/EvanatorM/WV-VoxelWorlds.git alpha-v0.1.0)
+target_link_libraries(${PROJECT_NAME} PRIVATE WVVoxelWorlds)
+target_include_directories(${PROJECT_NAME} PUBLIC ${wvvoxelworlds_SOURCE_DIR}/include)
 
 # Add ImGUI
-_fetch_git_module(imgui https://github.com/ocornut/imgui.git v1.92.4)
+_fetch_git_project(imgui https://github.com/ocornut/imgui.git v1.92.4)
 
 set(IMGUI_SOURCES
   ${imgui_SOURCE_DIR}/imgui.cpp
@@ -73,5 +65,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE imgui_backend)
 target_include_directories(${PROJECT_NAME} PRIVATE ${imgui_backend_SOURCE_DIR})
 
 # Add FastNoiseLite
-_fetch_git_module(fastnoise https://github.com/Auburn/FastNoiseLite.git v1.1.1)
+_fetch_git_project(fastnoise https://github.com/Auburn/FastNoiseLite.git v1.1.1)
 target_include_directories(${PROJECT_NAME} PRIVATE ${fastnoise_SOURCE_DIR}/Cpp)
