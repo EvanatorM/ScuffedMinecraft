@@ -7,7 +7,7 @@
 #include <wv/VoxelWorlds.h>
 #include <world/ScuffedWorldGen.h>
 #include <ui/UIManager.h>
-#include <cstdlib>
+#include <cmath>
 
 using namespace WillowVox;
 
@@ -138,9 +138,9 @@ namespace ScuffedMinecraft
                         int blockZ = block.z;
 
                         // Choose face to place on
-                        if (abs(distX) > abs(distY) && abs(distX) > abs(distZ))
+                        if (std::fabs(distX) > std::fabs(distY) && std::fabs(distX) > std::fabs(distZ))
                             blockX += (distX > 0 ? 1 : -1);
-                        else if (abs(distY) > abs(distX) && abs(distY) > abs(distZ))
+                        else if (std::fabs(distY) > std::fabs(distX) && std::fabs(distY) > std::fabs(distZ))
                             blockY += (distY > 0 ? 1 : -1);
                         else
                             blockZ += (distZ > 0 ? 1 : -1);

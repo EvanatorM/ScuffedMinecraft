@@ -28,6 +28,8 @@ target_compile_definitions(ScuffedMinecraft
 if (MSVC)
     add_compile_options(/fsanitize=address /Zi /Od)
     add_link_options(/fsanitize=address)
+else()
+    target_compile_options(ScuffedMinecraft PRIVATE -Wall -Wextra)
 endif()
 
 # Copy assets folder to build folder
