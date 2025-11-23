@@ -32,7 +32,7 @@ endif()
 
 # Copy assets folder to build folder
 add_custom_target(copy_assets ALL
-    COMMAND ${CMAKE_COMMAND} -E echo "Coping assets..."
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying assets..."
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:ScuffedMinecraft>/assets
