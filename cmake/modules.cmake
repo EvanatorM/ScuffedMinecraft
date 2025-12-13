@@ -12,11 +12,11 @@ macro(_fetch_git_project NAME REPO COMMIT)
 endmacro()
 
 # Add engine modules
-_fetch_git_project(WVCore https://github.com/EvanatorM/WV-Core.git alpha-v0.2.3)
+_fetch_git_project(WVCore https://github.com/EvanatorM/WV-Core.git alpha-v0.3.0)
 target_link_libraries(${PROJECT_NAME} PUBLIC WVCore)
 target_include_directories(${PROJECT_NAME} PUBLIC ${wvcore_SOURCE_DIR}/include)
 
-_fetch_git_project(WVVoxelWorlds https://github.com/EvanatorM/WV-VoxelWorlds.git alpha-v0.1.0)
+_fetch_git_project(WVVoxelWorlds https://github.com/EvanatorM/WV-VoxelWorlds.git alpha-v0.2.0)
 target_link_libraries(${PROJECT_NAME} PRIVATE WVVoxelWorlds)
 target_include_directories(${PROJECT_NAME} PUBLIC ${wvvoxelworlds_SOURCE_DIR}/include)
 

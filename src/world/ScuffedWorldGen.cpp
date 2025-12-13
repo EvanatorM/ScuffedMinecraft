@@ -35,6 +35,11 @@ namespace ScuffedMinecraft
 
     void ScuffedWorldGen::Generate(ChunkData* data, const glm::ivec3& chunkPos)
     {
+        const auto& br = BlockRegistry::GetInstance();
+        const auto grassBlockId = br.GetBlockId("grass_block");
+        const auto dirtBlockId = br.GetBlockId("dirt_block");
+        const auto stoneBlockId = br.GetBlockId("stone_block");
+
         for (int z = 0; z < CHUNK_SIZE; z++)
         {
             int worldZ = chunkPos.z + z;
@@ -73,11 +78,11 @@ namespace ScuffedMinecraft
                         depthBelowSurface++;
 
                         if (depthBelowSurface == 0)
-                            data->Set(x, y, z, 2); // Top block = Grass Block
+                            data->Set(x, y, z, grassBlockId); // Top block = Grass Block
                         else if (depthBelowSurface < 4)
-                            data->Set(x, y, z, 1); // 4 below top = Dirt Block
+                            data->Set(x, y, z, dirtBlockId); // 4 below top = Dirt Block
                         else
-                            data->Set(x, y, z, 3); // below 4 from top = Stone Block
+                            data->Set(x, y, z, stoneBlockId); // below 4 from top = Stone Block
                     }
                 }
             }
