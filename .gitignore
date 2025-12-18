@@ -21,6 +21,7 @@ compile_commands.json
 cmake-build-*/
 .vscode/
 .vs/
+CMakeSettings.json
 
 # macOS
 .DS_Store

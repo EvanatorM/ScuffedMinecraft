@@ -37,10 +37,10 @@ $<$<CONFIG:Debug>:DEBUG_MODE>
 $<$<CONFIG:Release>:RELEASE_MODE>
 )
 
-# Copy assets folder to build folder
-add_custom_target(copy_assets ALL
-    COMMAND ${CMAKE_COMMAND} -E echo "Copying assets..."
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:ScuffedMinecraft>/assets
+add_custom_command(
+  TARGET ScuffedMinecraft POST_BUILD  # Trigger after building MyExe
+  COMMAND ${CMAKE_COMMAND} -E copy_directory  # Copy only if DLL has changed
+    ${CMAKE_SOURCE_DIR}/assets  # Source: Full path to MyDLL.dll
+    $<TARGET_FILE_DIR:ScuffedMinecraft>/assets  # Destination: MyExe's directory
+  COMMENT "Copying MyDLL.dll to MyExe executable directory"  # Log message
 )
