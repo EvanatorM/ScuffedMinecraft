@@ -1,8 +1,6 @@
 # Scuffed Minecraft
 
-A very scuffed Minecraft clone. This project uses the following modules:
-- [WillowVox Core Engine Module](https://github.com/EvanatorM/WV-Core)
-- [WillowVox Voxel Worlds Engine Module](https://github.com/EvanatorM/WV-VoxelWorlds)
+A very scuffed Minecraft clone for my YouTube channel.
 
 ## Building
 
@@ -16,13 +14,15 @@ Run this command to get the dependencies for building GLFW:
 sudo apt install libwayland-dev libxkbcommon-dev xorg-dev cmake
 ```
 
+Follow this guide to install the Vulkan SDK: [Getting Started with the Linux Tarball Vulkan SDK](https://vulkan.lunarg.com/doc/view/latest/linux/getting_started.html)
+
 </details>
 
 <details>
 <summary>Installing dependencies on Windows</summary>
 <br>
 
-You only need to have CMake installed on your system.
+You need to have [CMake](https://cmake.org/download/) and the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) installed.
 
 </details>
 
@@ -55,4 +55,4 @@ to ensure all resources are loaded properly.
 
 ## Contributing
 
-As of right now, I'm not taking many contributions on this specific project because it is heavily tied to the YouTube series and because it is a learning experience. However, if you find some bugs or minor improvements that you want to make, you can do so and make a pull request. Don't get offended if I don't accept the changes, though. The other projects associated with this project (e.g. the core and voxel world modules) have their own contribution rules.
+As of right now, I'm not taking many contributions on this specific project because it is heavily tied to the YouTube series and because it is a learning experience. However, if you find some bugs or minor improvements that you want to make, you can do so and make a pull request. Don't get offended if I don't accept the changes, though.

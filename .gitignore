@@ -21,7 +21,6 @@ compile_commands.json
 cmake-build-*/
 .vscode/
 .vs/
-CMakeSettings.json
 
 # macOS
 .DS_Store
@@ -43,3 +42,6 @@ Desktop.ini
 *.dSYM/
 
 imgui.ini
+
+# Compiled shaders
+*.spv
